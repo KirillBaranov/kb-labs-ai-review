@@ -5,7 +5,7 @@
   "failOn": "major",
   "maxComments": 50,
   "out": {
-    "root": ".sentinel",
+    "root": ".kb-labs",
     "contextDir": "context",
     "reviewsDir": "reviews",
     "analyticsDir": "analytics",

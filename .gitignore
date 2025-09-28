@@ -23,7 +23,6 @@ coverage/
 
 # IDE / Editors
 .idea/
-.vscode/
 *.swp
 .DS_Store
 
