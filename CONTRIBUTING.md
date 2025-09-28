@@ -1,4 +1,4 @@
-# Contributing to Sentinel AI
+# Contributing to KB Labs AI Review
 
 Thanks for your interest in contributing 🚀  
 We welcome pull requests, bug reports, and feature discussions.  

@@ -3,7 +3,7 @@ import path from "node:path";
 import type { EnvelopeV1 } from "./schemas";
 
 export class JsonlWriter {
-  constructor(private dir = process.env.SENTINEL_ANALYTICS_DIR || ".sentinel/analytics") {}
+  constructor(private dir = process.env.SENTINEL_ANALYTICS_DIR || ".ai-review/analytics") {}
 
   private targetFile(): string {
     const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD

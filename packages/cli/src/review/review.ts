@@ -1,14 +1,14 @@
 import * as path from 'node:path'
 import * as crypto from 'node:crypto'
 
-import type { ReviewJson, Severity } from '@sentinel/core'
+import type { ReviewJson, Severity } from '@kb-labs/ai-review-core'
 import { maxSeverity, sevRank, findRepoRoot, printReviewSummary, printAnalyticsSummary } from '../cli-utils'
 
 import { pickProvider } from './providers'
 import { loadRules, loadBoundaries } from './profiles'
 import { readDiff, prepareOutputs, writeArtifacts } from './io'
 
-import { resolveAnalyticsConfig, createAnalyticsClient } from "@sentinel/analytics"
+import { resolveAnalyticsConfig, createAnalyticsClient } from "@kb-labs/ai-review-analytics"
 
 // ────────────────────────────────────────────────────────────────────────────────
 const REPO_ROOT = findRepoRoot()

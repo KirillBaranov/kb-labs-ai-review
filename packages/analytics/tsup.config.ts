@@ -1,24 +1,16 @@
-import { defineConfig } from 'tsup'
+import config from "@kb-labs/devkit/tsup/node.js";
 
-export default defineConfig({
-  entry: { index: 'src/index.ts' },
-  format: ['esm'],
-  target: 'node18',              // для CLI/Node
-  platform: 'node',
-  sourcemap: true,
-  clean: true,
-  outDir: 'dist',
-  splitting: false,
-  treeshake: false,
-  dts: false,
-  external: [
-    'better-sqlite3',
-  ],
-  shims: false,
+export default {
+  ...config,
+  entry: {
+    index: "src/index.ts",
+  },
+  external: ["better-sqlite3"],
+  clean: false,
   banner: {
     js: `
 import { createRequire as __createRequire } from 'module';
 const require = __createRequire(import.meta.url);
 `.trim(),
   },
-})
+};

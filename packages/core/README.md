@@ -1,6 +1,6 @@
-# @sentinel/core
+# @kb-labs/ai-review-core
 
-Core utilities for **Sentinel AI** — parsing diffs, running static checks, and rendering findings.  
+Core utilities for **KB Labs AI Review** — parsing diffs, running static checks, and rendering findings.  
 This package is framework-agnostic and contains only deterministic logic (no LLM calls).
 
 ## Features
@@ -12,13 +12,13 @@ This package is framework-agnostic and contains only deterministic logic (no LLM
 
 ## Installation
 ```bash
-pnpm add @sentinel/core
+pnpm add @kb-labs/ai-review-core
 ```
 
 ## Quick start
 ```ts
-import { analyzeDiff } from '@sentinel/core'
-import type { RulesJson } from '@sentinel/core'
+import { analyzeDiff } from '@kb-labs/ai-review-core'
+import type { RulesJson } from '@kb-labs/ai-review-core'
 
 const diffText = `diff --git a/a.ts b/a.ts ...`
 

@@ -15,7 +15,7 @@ import {
   queryTopRules,
   querySeverityTotals,
   migrate
-} from "@sentinel/analytics";
+} from "@kb-labs/ai-review-analytics";
 
 const REPO = findRepoRoot();
 const RC = loadConfig(); // ← читаем единый rc один раз

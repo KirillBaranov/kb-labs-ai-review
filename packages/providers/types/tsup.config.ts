@@ -1,13 +1,10 @@
-import { defineConfig } from 'tsup'
+import config from "@kb-labs/devkit/tsup/node.js";
 
-export default defineConfig({
-  entry: { index: 'src/index.ts' },
-  outDir: 'dist',
-  format: ['esm'],
-  sourcemap: true,
-  clean: true,
-  dts: false,
-  treeshake: true,
-  target: 'es2022',
-  external: ['@sentinel/core', '@sentinel/provider-types']
-})
+export default {
+  ...config,
+  entry: {
+    index: "src/index.ts",
+  },
+  external: ["@kb-labs/ai-review-core", "@kb-labs/ai-review-provider-types"],
+  clean: false,
+};

@@ -1,4 +1,4 @@
-import { renderMarkdown } from '@sentinel/core'
+import { renderMarkdown } from '@kb-labs/ai-review-core'
 
 const findings = []
 const md = renderMarkdown(findings)

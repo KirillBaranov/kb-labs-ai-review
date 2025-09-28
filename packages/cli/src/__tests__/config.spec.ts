@@ -90,7 +90,7 @@ describe('config.loadConfig (with sandbox)', () => {
   it('ENV overrides rc', async () => {
     writeRc(sbx.root, { defaultProfile: 'rc-prof', provider: 'mock' })
 
-    process.env.SENTINEL_PROFILE = 'env-prof'
+    process.env.AI_REVIEW_PROFILE = 'env-prof'
     process.env.SENTINEL_PROVIDER = 'openai'
     process.env.SENTINEL_OUT_DIR = 'out'
     process.env.SENTINEL_OUT_MD = 'env.md'
@@ -119,7 +119,7 @@ describe('config.loadConfig (with sandbox)', () => {
 
   it('CLI overrides highest priority (over env and rc)', async () => {
     writeRc(sbx.root, { defaultProfile: 'rc-prof', provider: 'mock' })
-    process.env.SENTINEL_PROFILE = 'env-prof'
+    process.env.AI_REVIEW_PROFILE = 'env-prof'
     process.env.SENTINEL_PROVIDER = 'openai'
     process.env.SENTINEL_OUT_DIR = 'env-out'
 

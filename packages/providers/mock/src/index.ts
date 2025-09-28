@@ -1,5 +1,5 @@
-import type { ReviewProvider, ProviderReviewInput } from '@sentinel/provider-types'
-import type { ReviewJson, ReviewFinding, Severity } from '@sentinel/core'
+import type { ReviewProvider, ProviderReviewInput } from '@kb-labs/ai-review-provider-types'
+import type { ReviewJson, ReviewFinding, Severity } from '@kb-labs/ai-review-core'
 
 export const mockProvider: ReviewProvider = {
   name: 'mock',

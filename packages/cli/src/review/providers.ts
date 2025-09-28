@@ -1,6 +1,6 @@
-import type { ReviewProvider } from '@sentinel/provider-types'
-import { mockProvider } from '@sentinel/provider-mock'
-import { localProvider } from '@sentinel/provider-local'
+import type { ReviewProvider } from '@kb-labs/ai-review-provider-types'
+import { mockProvider } from '@kb-labs/ai-review-provider-mock'
+import { localProvider } from '@kb-labs/ai-review-provider-local'
 
 export function pickProvider(id?: string): ReviewProvider {
   const name = (id || process.env.SENTINEL_PROVIDER || 'local').toLowerCase()

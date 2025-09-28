@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import type { ReviewJson, ReviewFinding } from '@sentinel/core'
+import type { ReviewJson, ReviewFinding } from '@kb-labs/ai-review-core'
 import {
   findRepoRoot,
   ensureDirForFile,

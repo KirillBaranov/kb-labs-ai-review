@@ -20,8 +20,8 @@ type Event = {
 };
 
 export type IngestOptions = {
-  fromDir: string;   // .sentinel/analytics
-  dbPath: string;    // .sentinel/analytics/analytics.db
+  fromDir: string;   // .ai-review/analytics
+  dbPath: string;    // .ai-review/analytics/analytics.db
   since?: string;    // YYYY-MM-DD (UTC, опционально)
 };
 

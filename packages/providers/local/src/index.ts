@@ -1,6 +1,6 @@
-import type { ReviewJson, BoundariesConfig } from '@sentinel/core'
-import type { ReviewProvider, ProviderReviewInput } from '@sentinel/provider-types'
-import { analyzeDiff } from '@sentinel/core'
+import type { ReviewJson, BoundariesConfig } from '@kb-labs/ai-review-core'
+import type { ReviewProvider, ProviderReviewInput } from '@kb-labs/ai-review-provider-types'
+import { analyzeDiff } from '@kb-labs/ai-review-core'
 
 export const localProvider: ReviewProvider = {
   name: 'local',

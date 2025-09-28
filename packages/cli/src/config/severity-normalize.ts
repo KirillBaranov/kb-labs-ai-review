@@ -1,5 +1,5 @@
-import type { Severity, SeverityMap } from '@sentinel/core';
-import { DEFAULT_SEVERITY_MAP } from '@sentinel/core';
+import type { Severity, SeverityMap } from '@kb-labs/ai-review-core';
+import { DEFAULT_SEVERITY_MAP } from '@kb-labs/ai-review-core';
 
 const SEVERITIES: Severity[] = ['critical', 'major', 'minor', 'info'];
 

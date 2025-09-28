@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { localProvider } from '../index'
-import type { BoundariesConfig } from '@sentinel/core'
-import type { RulesJson } from '@sentinel/core'
+import type { BoundariesConfig } from '@kb-labs/ai-review-core'
+import type { RulesJson } from '@kb-labs/ai-review-core'
 
 function makeDiff(text: string, file = 'src/features/a/file.ts') {
   return [
@@ -48,7 +48,7 @@ function makeRulesJson(partial?: Partial<RulesJson>): RulesJson {
   }
 }
 
-describe('@sentinel/provider-local', () => {
+describe('@kb-labs/ai-review-provider-local', () => {
   it('exposes provider name', () => {
     expect(localProvider.name).toBeDefined()
     expect(localProvider.name?.toLowerCase()).toContain('local')

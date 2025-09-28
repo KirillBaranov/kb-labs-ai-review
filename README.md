@@ -1,4 +1,4 @@
-# Sentinel AI
+# KB Labs AI Review
 
 **AI-powered code review framework** with profile-based rules, dual output (JSON + Markdown), and GitHub/GitLab integration.  
 Designed to catch architectural and stylistic issues beyond static linters.
@@ -15,8 +15,8 @@ Designed to catch architectural and stylistic issues beyond static linters.
 - **Profiles**: isolated rule sets (`frontend`, `backend`, `e2e`), each with its own handbook, ADRs, and rules.json.
 - **Dual output**: JSON (machine, metrics) + Markdown (developer-friendly).
 - **Core/CLI separation**:
-  - `@sentinel/core` → parsing, normalization, rendering.
-  - `@sentinel/cli` → developer interface and CI integration.
+  - `@kb-labs/ai-review-core` → parsing, normalization, rendering.
+  - `@kb-labs/ai-review-cli` → developer interface and CI integration.
 - **AI-assisted findings**: complex cases beyond ESLint/TypeScript.
 - **Workspace-friendly**: built with `pnpm` monorepo.
 
@@ -26,8 +26,8 @@ Designed to catch architectural and stylistic issues beyond static linters.
 
 ```bash
 # clone
-git clone https://github.com/kirill-baranov/sentinel-ai.git
-cd sentinel-ai
+git clone https://github.com/kirill-baranov/kb-labs-ai-review.git
+cd kb-labs-ai-review
 
 # install deps
 pnpm install

@@ -17,10 +17,10 @@ function resolveModule(ref: string, cwd = process.cwd()) {
 }
 
 export async function loadPlugins(
-  cfgPath = ".sentinel/analytics.config.json",
+  cfgPath = ".ai-review/analytics.config.json",
   baseCtx: Omit<PluginContext, "cfg"> = {
     log: (...a) => console.log("[analytics:plugin]", ...a),
-    paths: { analyticsDir: process.env.SENTINEL_ANALYTICS_DIR || ".sentinel/analytics" },
+    paths: { analyticsDir: process.env.SENTINEL_ANALYTICS_DIR || ".ai-review/analytics" },
     env: { privacy: "team" },
   }
 ): Promise<{ plugins: SentinelPlugin[]; getCtx: (ref: string) => PluginContext }> {

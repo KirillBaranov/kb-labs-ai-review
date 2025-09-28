@@ -104,10 +104,10 @@ describe('scripts/validate-rules.ts (process integration)', () => {
     }
   })
 
-  it('resolves profiles directory from SENTINEL_PROFILES_DIR when flag is absent', () => {
+  it('resolves profiles directory from AI_REVIEW_PROFILES_DIR when flag is absent', () => {
     const { profile } = writeValidProfile(sbx.root, 'frontend')
     const out = runScript(['--profile', profile], {
-      env: { ...process.env, SENTINEL_PROFILES_DIR: sbx.root },
+      env: { ...process.env, AI_REVIEW_PROFILES_DIR: sbx.root },
     })
     expect(out).toMatch(/✅ rules\.json is valid/)
   })

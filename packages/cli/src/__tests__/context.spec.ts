@@ -19,7 +19,7 @@ describe('buildContext (with sandbox)', () => {
     makeProfile(sbx.root, 'frontend')
 
     process.env.SENTINEL_REPO_ROOT = sbx.root
-    delete process.env.SENTINEL_PROFILES_DIR
+    delete process.env.AI_REVIEW_PROFILES_DIR
     delete process.env.SENTINEL_CONTEXT_MAX_TOKENS
     delete process.env.SENTINEL_CONTEXT_MAX_BYTES
   })

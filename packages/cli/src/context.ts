@@ -99,7 +99,7 @@ function buildTOC(blobs: FileBlob[], baseLabel: string, rootHint: string): strin
 
 function resolveProfilesDir(repoRoot: string, explicit?: string): string {
   // 1) explicit (arg or ENV)
-  const envDir = process.env.SENTINEL_PROFILES_DIR
+  const envDir = process.env.AI_REVIEW_PROFILES_DIR
   const wanted = explicit ?? envDir
   if (wanted) {
     const abs = path.isAbsolute(wanted) ? wanted : path.join(repoRoot, wanted)
@@ -115,7 +115,7 @@ function resolveProfilesDir(repoRoot: string, explicit?: string): string {
   throw new Error(
     `profiles dir not found.\nTried:\n` +
     candidates.map(c => ` - ${c}`).join('\n') +
-    `\nPass --profiles-dir or set SENTINEL_PROFILES_DIR.`
+    `\nPass --profiles-dir or set AI_REVIEW_PROFILES_DIR.`
   )
 }
 
@@ -328,7 +328,7 @@ export async function buildContextCLI(opts: {
   printContextSummary({
     repoRoot: REPO_ROOT,
     profile: opts.profile,
-    profilesRootLabel: opts.profilesDir ?? process.env.SENTINEL_PROFILES_DIR ?? '(auto)',
+    profilesRootLabel: opts.profilesDir ?? process.env.AI_REVIEW_PROFILES_DIR ?? '(auto)',
     outFile: res.outFile,
     handbookCount: res.counts.handbook,
     adrCount: res.counts.adr,

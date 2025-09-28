@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "exclude": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/tsup.config.ts",
+    "**/vitest.config.ts",
+    "apps/**"
+  ]
+}

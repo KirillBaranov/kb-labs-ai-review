@@ -17,7 +17,7 @@ export type RunRow = {
 type Fmt = "csv" | "json";
 
 export interface ExportOptions {
-  dbPath: string;           // путь к SQLite (.sentinel/analytics/analytics.db)
+  dbPath: string;           // путь к SQLite (.ai-review/analytics/analytics.db)
   outDir: string;           // каталог для экспорта
   format?: Fmt;             // csv|json (по умолчанию csv)
   since?: string;           // YYYY-MM-DD (UTC полночь)

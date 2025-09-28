@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { bold, cyan, dim, green, red, yellow } from 'colorette'
-import type { Severity } from '@sentinel/core'
+import type { Severity } from '@kb-labs/ai-review-core'
 
 type AnalyticsRcLike = {
   analytics?: {
@@ -266,7 +266,7 @@ export function printInitNextSteps(args: {
   console.log('  - Edit ' + yellow(relHandbook) + ' to reflect your team agreements.')
   console.log('  - Adjust ' + yellow(relRules) + ' severities/areas to fit your policy.')
   console.log('  - Try a dry run:\n    ' +
-    dim(`pnpm --filter @sentinel/cli exec tsx src/index.ts review ` +
+    dim(`pnpm --filter @kb-labs/ai-review-cli exec tsx src/index.ts review ` +
         `--diff ../../fixtures/changes.diff ` +
         `--profile ${profile} ` +
         `--profiles-dir ${relProfilesRoot} ` +
@@ -292,7 +292,7 @@ export function resolveAnalyticsOut(args: {
   const outDirRaw =
     rc?.analytics?.outDir ||
     process.env.SENTINEL_ANALYTICS_DIR ||
-    '.sentinel/analytics'
+    '.ai-review/analytics'
 
   const outDirAbs = resolveRepoPath(repoRoot, outDirRaw)
 

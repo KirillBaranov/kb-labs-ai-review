@@ -2,7 +2,7 @@ import type {
   ReviewJson,
   ReviewFinding,
   RulesJson,
-} from '@sentinel/core'
+} from '@kb-labs/ai-review-core'
 
 export type ProviderBoundaries = unknown
 

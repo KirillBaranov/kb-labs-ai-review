@@ -21,7 +21,7 @@ import {
 import {
   type RenderOptions,
   renderMarkdown,
-} from "@sentinel/core";
+} from "@kb-labs/ai-review-core";
 
 import { registerAnalyticsCommands } from "./cmd/analytics";
 
@@ -237,7 +237,7 @@ program
       try {
         // 1) конфиг + профиль
         const rc = loadConfig({ profile: opts.profile });
-        const profile = opts.profile || process.env.SENTINEL_PROFILE || rc.profile;
+        const profile = opts.profile || process.env.AI_REVIEW_PROFILE || rc.profile;
 
         // 2) пути по умолчанию
         const defaultIn  = path.join(rc.out.reviewsDirAbs, profile, rc.out.jsonName);              // .../reviews/<profile>/review.json
@@ -307,8 +307,8 @@ program
 program
   .command("render-html")
   .description("Render review.json → HTML report")
-  .option("--in <path>",  "input review.json (defaults to .sentinel/reviews/<profile>/review.json)")
-  .option("--out <path>", "output review.html (defaults next to input or to .sentinel/reviews/<profile>/review.html)")
+  .option("--in <path>",  "input review.json (defaults to .ai-review/reviews/<profile>/review.json)")
+  .option("--out <path>", "output review.html (defaults next to input or to .ai-review/reviews/<profile>/review.html)")
   .action(async (opts) => {
     try {
       const rc = loadConfig();
@@ -365,7 +365,7 @@ program
   });
 
 // ────────────────────────────────────────────────────────────────────────────────
-// analytics (подкоманды подтягиваются из пакета @sentinel/analytics)
+// analytics (подкоманды подтягиваются из пакета @kb-labs/ai-review-analytics)
 // ────────────────────────────────────────────────────────────────────────────────
 registerAnalyticsCommands(program);
 

@@ -135,8 +135,8 @@ function mergeRc(base: SentinelRc, over?: SentinelRc): SentinelRc {
 function envAsRc(): SentinelRc {
   const out: SentinelRc = {}
 
-  if (process.env.SENTINEL_PROFILE) out.profile = process.env.SENTINEL_PROFILE
-  if (process.env.SENTINEL_PROFILES_DIR) out.profilesDir = process.env.SENTINEL_PROFILES_DIR as string
+  if (process.env.AI_REVIEW_PROFILE) out.profile = process.env.AI_REVIEW_PROFILE
+  if (process.env.AI_REVIEW_PROFILES_DIR) out.profilesDir = process.env.AI_REVIEW_PROFILES_DIR as string
   if (process.env.SENTINEL_PROVIDER) out.provider = process.env.SENTINEL_PROVIDER as ProviderName
   if (process.env.SENTINEL_FAIL_ON) out.failOn = process.env.SENTINEL_FAIL_ON as FailOn
   if (process.env.SENTINEL_MAX_COMMENTS) out.maxComments = Number(process.env.SENTINEL_MAX_COMMENTS)

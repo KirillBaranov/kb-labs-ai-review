@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import type { RulesJson, BoundariesConfig } from '@sentinel/core'
+import type { RulesJson, BoundariesConfig } from '@kb-labs/ai-review-core'
 
 export function resolveProfileRoot(repoRoot: string, profile: string, profilesDir?: string): string {
   if (profile.includes('/') || profile.startsWith('.') || path.isAbsolute(profile)) {

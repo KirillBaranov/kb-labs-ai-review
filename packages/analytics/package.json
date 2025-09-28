@@ -1,5 +1,5 @@
 {
-  "name": "@sentinel/analytics",
+  "name": "@kb-labs/ai-review-analytics",
   "version": "0.1.0",
   "private": false,
   "type": "module",
@@ -26,7 +26,7 @@
     "analytics:export": "node dist/index.js analytics:export"
   },
   "dependencies": {
-    "@sentinel/core": "workspace:*"
+    "@kb-labs/ai-review-core": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

@@ -18,7 +18,7 @@ function readArg(flag: string, fallback?: string) {
 }
 
 function resolveProfilesDir(repoRoot: string, explicit?: string) {
-  const envDir = process.env.SENTINEL_PROFILES_DIR
+  const envDir = process.env.AI_REVIEW_PROFILES_DIR
   const wanted = explicit ?? envDir
   const candidates = [
     wanted ? (path.isAbsolute(wanted) ? wanted : path.join(repoRoot, wanted)) : null,

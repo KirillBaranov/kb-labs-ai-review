@@ -1,6 +1,6 @@
-# 📊 Sentinel Analytics
+# 📊 KB Labs AI Review Analytics
 
-> Analytics module for Sentinel AI Review.  
+> Analytics module for KB Labs AI Review.  
 > Tracks findings, runs, and feedback to provide transparency, trust, and measurable impact.
 
 ---

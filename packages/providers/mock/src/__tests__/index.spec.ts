@@ -12,7 +12,7 @@ function makeDiff(text: string, file = 'src/file.ts') {
   ].join('\n')
 }
 
-describe('@sentinel/provider-mock', () => {
+describe('@kb-labs/ai-review-provider-mock', () => {
   it('exposes provider name', () => {
     expect(mockProvider.name).toBeDefined()
     expect(mockProvider.name?.toLowerCase()).toContain('mock')

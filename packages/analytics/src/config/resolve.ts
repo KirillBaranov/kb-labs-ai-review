@@ -31,7 +31,7 @@ export function resolveAnalyticsConfig(input: {
     overrides?.outDir ??
     rc?.analytics?.outDir ??
     process.env.SENTINEL_ANALYTICS_DIR ??
-    ".sentinel/analytics";
+    ".ai-review/analytics";
   const outDir = path.isAbsolute(outDirRaw) ? outDirRaw : path.join(repoRoot, outDirRaw);
 
   const modeEnv = (process.env.SENTINEL_ANALYTICS_FILE_MODE as "byRun" | "byDay") || undefined;

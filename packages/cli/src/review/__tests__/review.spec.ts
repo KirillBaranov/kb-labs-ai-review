@@ -7,7 +7,7 @@ import { makeSandbox, makeProfile } from '../../__tests__/helpers/sandbox'
 type Finding = { severity: 'critical'|'major'|'minor'|'info', rule: string, file: string, finding: string[], why?: string, suggestion?: string }
 const makeReview = (findings: Finding[]) => ({ ai_review: { run_id: 'test-run', findings } })
 
-vi.mock('@sentinel/provider-mock', () => ({
+vi.mock('@kb-labs/ai-review-provider-mock', () => ({
   mockProvider: {
     name: 'mock',
     review: vi.fn(async (_args: any) => makeReview([
@@ -18,7 +18,7 @@ vi.mock('@sentinel/provider-mock', () => ({
   }
 }))
 
-vi.mock('@sentinel/provider-local', () => ({
+vi.mock('@kb-labs/ai-review-provider-local', () => ({
   localProvider: {
     name: 'local',
     review: vi.fn(async (_args: any) => makeReview([

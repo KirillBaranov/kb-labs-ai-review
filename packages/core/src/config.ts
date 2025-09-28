@@ -200,7 +200,7 @@ function resolveProfilePaths(repoRoot: string, cfg: SentinelConfig): ResolvedPro
  *
  * ENV overrides (optional):
  * - SENTINEL_LANG_IN / SENTINEL_LANG_OUT
- * - SENTINEL_PROFILE
+ * - AI_REVIEW_PROFILE
  */
 export async function loadConfig(cwd: string = process.cwd()): Promise<LoadedConfig> {
   const configPath = path.resolve(cwd, 'sentinel.config.yml')
@@ -211,7 +211,7 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<LoadedCon
   // Basic env overrides
   if (process.env.SENTINEL_LANG_IN) merged.language.input = String(process.env.SENTINEL_LANG_IN)
   if (process.env.SENTINEL_LANG_OUT) merged.language.output = String(process.env.SENTINEL_LANG_OUT)
-  if (process.env.SENTINEL_PROFILE) merged.profile.name = String(process.env.SENTINEL_PROFILE)
+  if (process.env.AI_REVIEW_PROFILE) merged.profile.name = String(process.env.AI_REVIEW_PROFILE)
 
   const resolved = resolveProfilePaths(cwd, merged)
 

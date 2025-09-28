@@ -1,6 +1,6 @@
-# @sentinel/cli
+# @kb-labs/ai-review-cli
 
-Command-line interface for **Sentinel AI**.  
+Command-line interface for **KB Labs AI Review**.  
 Provides commands to build review context, run analysis (local or AI-powered), and render results.
 
 ## Features
@@ -15,12 +15,12 @@ Provides commands to build review context, run analysis (local or AI-powered), a
 
 ## Installation
 ```bash
-pnpm add -D @sentinel/cli
+pnpm add -D @kb-labs/ai-review-cli
 ```
 
 ## Usage
 ```bash
-pnpm sentinel --help
+pnpm ai-review --help
 ```
 
 ## Commands
