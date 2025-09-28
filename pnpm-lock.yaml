@@ -57,7 +57,7 @@ importers:
 
   apps/demo:
     dependencies:
-      '@sentinel/core':
+      '@kb-labs/ai-review-core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -73,7 +73,7 @@ importers:
 
   packages/analytics:
     dependencies:
-      '@sentinel/core':
+      '@kb-labs/ai-review-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -89,19 +89,19 @@ importers:
 
   packages/cli:
     dependencies:
-      '@sentinel/analytics':
+      '@kb-labs/ai-review-analytics':
         specifier: workspace:*
         version: link:../analytics
-      '@sentinel/core':
+      '@kb-labs/ai-review-core':
         specifier: workspace:*
         version: link:../core
-      '@sentinel/provider-local':
+      '@kb-labs/ai-review-provider-local':
         specifier: workspace:*
         version: link:../providers/local
-      '@sentinel/provider-mock':
+      '@kb-labs/ai-review-provider-mock':
         specifier: workspace:*
         version: link:../providers/mock
-      '@sentinel/provider-types':
+      '@kb-labs/ai-review-provider-types':
         specifier: workspace:*
         version: link:../providers/types
       colorette:
@@ -160,10 +160,10 @@ importers:
 
   packages/providers/local:
     dependencies:
-      '@sentinel/core':
+      '@kb-labs/ai-review-core':
         specifier: workspace:*
         version: link:../../core
-      '@sentinel/provider-types':
+      '@kb-labs/ai-review-provider-types':
         specifier: workspace:*
         version: link:../types
     devDependencies:
@@ -182,10 +182,10 @@ importers:
 
   packages/providers/mock:
     dependencies:
-      '@sentinel/core':
+      '@kb-labs/ai-review-core':
         specifier: workspace:*
         version: link:../../core
-      '@sentinel/provider-types':
+      '@kb-labs/ai-review-provider-types':
         specifier: workspace:*
         version: link:../types
     devDependencies:
@@ -204,10 +204,10 @@ importers:
 
   packages/providers/types:
     dependencies:
-      '@sentinel/core':
+      '@kb-labs/ai-review-core':
         specifier: workspace:*
         version: link:../../core
-      '@sentinel/provider-types':
+      '@kb-labs/ai-review-provider-types':
         specifier: workspace:*
         version: 'link:'
     devDependencies:
