@@ -1,4 +1,22 @@
 {
+  "sync": {
+    "enabled": true,
+    "only": [
+      "ci",
+      "drift-check"
+    ],
+    "scope": "managed-only",
+    "force": false,
+    "disabled": [],
+    "overrides": {},
+    "targets": {
+      "ci": {
+        "from": ".github/workflow-templates",
+        "to": ".github/workflows",
+        "type": "dir"
+      }
+    }
+  },
   "profile": "frontend",
   "profilesDir": "packages/profiles",
   "provider": "local",
