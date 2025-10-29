@@ -41,7 +41,6 @@
     "build": "pnpm -r run build",
     "build:clean": "pnpm -r run clean && pnpm -r run build",
     "dev": "pnpm -r --parallel --filter @kb-labs/ai-review-core --filter @kb-labs/ai-review-analytics --filter @kb-labs/ai-review-provider-* --filter @kb-labs/ai-review-cli run dev",
-
     "// ——— quality": "────────────────────────────────────────",
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint:fix",
@@ -50,37 +49,30 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc -b tsconfig.tools.json",
-
     "// ——— ci/qa": "────────────────────────────────────────",
     "check": "pnpm lint && pnpm type-check && pnpm test -- --run",
     "ci": "pnpm clean && pnpm build && pnpm check",
-
     "// ——— cleanup": "────────────────────────────────────────",
     "clean:all": "rimraf node_modules packages/*/node_modules apps/*/node_modules dist .ai-review",
     "clean:analytics": "rimraf .ai-review/analytics dist/analytics dist/analytics-export",
-
     "// ——— context": "────────────────────────────────────────",
     "ai-review:context:dev": "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts build-context",
-    "ai-review:context":     "pnpm -r build && pnpm -F @kb-labs/ai-review-cli exec node dist/index.js build-context",
-
+    "ai-review:context": "pnpm -r build && pnpm -F @kb-labs/ai-review-cli exec node dist/index.js build-context",
     "// ——— review": "────────────────────────────────────────",
-    "ai-review:review:dev":        "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts review --diff fixtures/changes.diff",
+    "ai-review:review:dev": "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts review --diff fixtures/changes.diff",
     "ai-review:review:nofail:dev": "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts review --diff fixtures/changes.diff --fail-on none",
-    "ai-review:review":            "pnpm -r build && pnpm -F @kb-labs/ai-review-cli exec node dist/index.js review --diff fixtures/changes.diff",
-
+    "ai-review:review": "pnpm -r build && pnpm -F @kb-labs/ai-review-cli exec node dist/index.js review --diff fixtures/changes.diff",
     "// ——— render": "────────────────────────────────────────",
-    "ai-review:render-md:dev":   "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts render-md --in .ai-review/reviews/review.json --out .ai-review/reviews/review.human.md",
-    "ai-review:render-md":       "pnpm -r build && AI_REVIEW_PROFILE=frontend pnpm -F @kb-labs/ai-review-cli exec node dist/index.js render-md",
+    "ai-review:render-md:dev": "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts render-md --in .ai-review/reviews/review.json --out .ai-review/reviews/review.human.md",
+    "ai-review:render-md": "pnpm -r build && AI_REVIEW_PROFILE=frontend pnpm -F @kb-labs/ai-review-cli exec node dist/index.js render-md",
     "ai-review:render-html:dev": "pnpm -F @kb-labs/ai-review-cli exec tsx src/index.ts render-html --in .ai-review/reviews/review.json --out .ai-review/reviews/review.html",
-    "ai-review:render-html":     "pnpm -r build && AI_REVIEW_PROFILE=frontend pnpm -F @kb-labs/ai-review-cli exec node dist/index.js render-html",
-
+    "ai-review:render-html": "pnpm -r build && AI_REVIEW_PROFILE=frontend pnpm -F @kb-labs/ai-review-cli exec node dist/index.js render-html",
     "// ——— analytics": "────────────────────────────────────────",
     "ai-review:analytics:ingest": "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:ingest",
-    "ai-review:analytics:print":  "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:print",
-    "ai-review:analytics:top":    "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:top",
-    "ai-review:analytics:trend":  "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:trend",
+    "ai-review:analytics:print": "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:print",
+    "ai-review:analytics:top": "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:top",
+    "ai-review:analytics:trend": "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:trend",
     "ai-review:analytics:export": "pnpm -F @kb-labs/ai-review-cli exec node dist/index.js analytics:export",
-
     "// ——— demos": "────────────────────────────────────────",
     "demo": "pnpm -F @kb-labs/ai-review-demo dev"
   },
@@ -93,7 +85,7 @@
     ]
   },
   "dependencies": {
-    "@kb-labs/devkit": "github:KirillBaranov/kb-labs-devkit#main",
+    "@kb-labs/devkit": "link:../kb-labs-devkit",
     "zod": "^4.1.5"
   },
   "devDependencies": {

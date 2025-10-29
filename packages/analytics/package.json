@@ -11,22 +11,25 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist",
-    "build:js": "tsup --config tsup.config.ts",
-    "build:types": "tsc -p tsconfig.types.json --emitDeclarationOnly",
-    "build": "pnpm clean && pnpm build:js && pnpm build:types",
-
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --config tsup.config.ts --watch",
+    "type-check": "tsc --noEmit",
     "analytics:ingest": "node dist/index.js analytics:ingest",
-    "analytics:print":  "node dist/index.js analytics:print",
-    "analytics:top":    "node dist/index.js analytics:top",
-    "analytics:trend":  "node dist/index.js analytics:trend",
+    "analytics:print": "node dist/index.js analytics:print",
+    "analytics:top": "node dist/index.js analytics:top",
+    "analytics:trend": "node dist/index.js analytics:trend",
     "analytics:export": "node dist/index.js analytics:export"
   },
   "dependencies": {
-    "@kb-labs/ai-review-core": "workspace:*"
+    "@kb-labs/ai-review-core": "link:../core"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

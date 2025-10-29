@@ -2,28 +2,39 @@
   "name": "@kb-labs/ai-review-cli",
   "version": "0.1.0",
   "type": "module",
-  "bin": { "ai-review": "./dist/index.js" },
+  "bin": {
+    "ai-review": "./dist/index.js"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" }
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "kb": {
+    "commandsManifest": "./dist/cli.manifest.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist",
-    "build:js": "tsup --config tsup.config.ts",
-    "build:types": "tsc -p tsconfig.types.json --emitDeclarationOnly",
-    "build": "pnpm clean && pnpm build:js && pnpm build:types",
+    "build": "tsup --config tsup.config.ts",
     "dev": "tsup --config tsup.config.ts --watch",
+    "type-check": "tsc --noEmit",
     "test": "vitest"
   },
   "dependencies": {
-    "@kb-labs/ai-review-core": "workspace:*",
+    "@kb-labs/ai-review-core": "link:../core",
     "@kb-labs/ai-review-provider-types": "workspace:*",
     "@kb-labs/ai-review-provider-mock": "workspace:*",
     "@kb-labs/ai-review-provider-local": "workspace:*",
-    "@kb-labs/ai-review-analytics": "workspace:*",
+    "@kb-labs/ai-review-analytics": "link:../analytics",
     "commander": "^12.1.0",
     "colorette": "^2.0.20"
   },

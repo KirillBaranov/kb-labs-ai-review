@@ -10,15 +10,13 @@
   "files": ["dist"],
   "scripts": {
     "clean": "rimraf dist",
-    "build:js": "tsup --config tsup.config.ts",
-    "build:types": "tsc -p tsconfig.types.json --emitDeclarationOnly",
-    "build": "pnpm clean && pnpm build:js && pnpm build:types",
+    "build": "tsup --config tsup.config.ts",
     "dev": "tsup --config tsup.config.ts --watch",
+    "type-check": "tsc --noEmit",
     "test": "vitest"
   },
   "dependencies": {
-    "@kb-labs/ai-review-core": "workspace:*",
-    "@kb-labs/ai-review-provider-types": "workspace:*"
+    "@kb-labs/ai-review-core": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

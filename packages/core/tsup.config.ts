@@ -7,5 +7,5 @@ export default {
     "scripts/validate-rules": "src/scripts/validate-rules.ts",
   },
   external: ["ajv", "ajv-formats", "yaml", "picomatch"],
-  clean: false,
+  clean: true,
 };

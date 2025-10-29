@@ -18,12 +18,10 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist",
-    "build:js": "tsup --config tsup.config.ts",
-    "build:types": "tsc -p tsconfig.types.json --emitDeclarationOnly",
     "postbuild": "cpy src/lib/schema dist/lib --parents",
-    "build": "pnpm clean && pnpm build:js && pnpm build:types && pnpm postbuild",
+    "build": "tsup --config tsup.config.ts && pnpm postbuild",
     "dev": "tsup --config tsup.config.ts --watch",
-    "type-check": "tsc -p tsconfig.types.json --noEmit",
+    "type-check": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {

@@ -12,7 +12,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@kb-labs/ai-review-core": "workspace:*"
+    "@kb-labs/ai-review-core": "link:../../packages/core"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
