@@ -15,6 +15,10 @@
     "@kb-labs/ai-review-core": "link:../../packages/core"
   },
   "devDependencies": {
+    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^9",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vitest": "^2.1.4"
