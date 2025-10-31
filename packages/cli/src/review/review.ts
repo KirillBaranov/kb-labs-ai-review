@@ -3,13 +3,14 @@ import * as crypto from 'node:crypto'
 
 import type { ReviewJson } from '@kb-labs/shared-review-types'
 import type { Severity } from '@kb-labs/shared-review-types'
-import { maxSeverity, sevRank, findRepoRoot, printReviewSummary, printAnalyticsSummary } from '../cli-utils'
+import { maxSeverity, sevRank, findRepoRoot, printReviewSummary } from '../cli-utils'
 
 import { pickProvider } from './providers'
 import { loadRules, loadBoundaries } from './profiles'
 import { readDiff, prepareOutputs, writeArtifacts } from './io'
 
-import { resolveAnalyticsConfig, createAnalyticsClient } from "@kb-labs/ai-review-analytics"
+import { runScope, type AnalyticsEventV1, type EmitResult } from '@kb-labs/analytics-sdk-node'
+import { ANALYTICS_EVENTS, ANALYTICS_ACTOR } from '../analytics/events'
 
 // ────────────────────────────────────────────────────────────────────────────────
 const REPO_ROOT = findRepoRoot()
@@ -35,8 +36,6 @@ function computeExit(top: Severity | null | undefined, failOn?: 'none' | 'major'
 }
 
 // helpers
-const sha1 = (s: string) => crypto.createHash('sha1').update(s).digest('hex')
-const salted = (s: string, salt: string) => sha1(`${salt}:${s}`)
 function resolveAbs(repoRoot: string, maybePath?: string): string | undefined {
   if (!maybePath) return undefined
   return path.isAbsolute(maybePath) ? maybePath : path.join(repoRoot, maybePath)
@@ -52,8 +51,6 @@ export async function runReviewCLI(opts: {
   provider?: string
   failOn?: 'none' | 'major' | 'critical'
   maxComments?: number
-  analytics?: boolean
-  analyticsOut?: string
   debug?: boolean
   rc?: any               // пробрасываем целиком rc из команды
 }) {
@@ -80,112 +77,120 @@ export async function runReviewCLI(opts: {
     })
   }
 
-  // ── Analytics: resolver + client
+  const startTime = Date.now()
   const runId = crypto.randomUUID?.() ?? `run_${Date.now()}`
-  const cfgResolved = resolveAnalyticsConfig({
-    rc: opts.rc,                       // .ai-reviewrc.json уже разобран в командe
-    repoRoot: REPO_ROOT,
-    overrides: {
-      enabled: typeof opts.analytics === 'boolean' ? opts.analytics : undefined,
-      outDir: opts.analyticsOut,
-    },
-  })
 
-  const analytics = createAnalyticsClient(
+  return await runScope(
     {
-      projectRemoteUrl: process.env.GIT_REMOTE_URL || process.env.CI_REPOSITORY_URL,
-      commitSha: process.env.GIT_COMMIT_SHA || process.env.CI_COMMIT_SHA,
-      branch: process.env.GIT_BRANCH || process.env.CI_COMMIT_BRANCH,
-      provider: providerLabel,
-      profile: opts.profile,
-      env: (process.env.AI_REVIEW_ENV as any) || 'dev',
-    },
-    cfgResolved
-  )
-
-  await analytics.init()
-  analytics.start(runId, { model: process.env.AI_REVIEW_MODEL })
-
-  printAnalyticsSummary({ repoRoot: REPO_ROOT, runId, diag: analytics.diagnostics() })
-
-  const startedAt = Date.now()
-
-  // ── Основной review через провайдера
-  const review: ReviewJson = await provider.review({
-    diffText,
-    profile: opts.profile,
-    rules: rulesRaw,
-    boundaries,
-  })
-
-  // Канонизируем run_id
-  review.ai_review.run_id = runId
-
-  // cap findings: cli flag > ENV
-  const envCap = process.env.AI_REVIEW_MAX_COMMENTS ? Number(process.env.AI_REVIEW_MAX_COMMENTS) : undefined
-  const cap = Number.isFinite(opts.maxComments as number)
-    ? (opts.maxComments as number)
-    : Number.isFinite(envCap as number)
-    ? (envCap as number)
-    : undefined
-
-  review.ai_review.findings = capFindings(
-    review.ai_review.findings as unknown as { severity: Severity }[],
-    cap
-  ) as any
-
-  // артефакты JSON + Markdown транспорт
-  writeArtifacts(outJsonPath, outMdPath, review)
-
-  // summary + exit
-  const findings = review.ai_review.findings as unknown as {
-    severity: Severity
-    rule: string
-    file?: string
-    locator?: string
-  }[]
-
-  const top = maxSeverity(findings)
-  const exit = computeExit(top, opts.failOn)
-
-  printReviewSummary({
-    repoRoot: REPO_ROOT,
-    providerLabel,
-    profile: opts.profile,
-    outJsonPath,
-    outMdPath,
-    findings,
-    exit,
-  })
-
-  // ── Analytics: finding.reported + run.finished
-  const counts: Record<Severity, number> = { critical: 0, major: 0, minor: 0, info: 0 }
-  const salt = cfgResolved.salt // используем ровно тот же salt, что и рантайм
-
-  for (const f of findings) {
-    counts[f.severity] = (counts[f.severity] ?? 0) + 1
-
-    // privacy-first: хеш абсолютного пути
-    const fileAbs = resolveAbs(REPO_ROOT, f.file)
-    const fileHash = fileAbs ? salted(fileAbs, salt) : 'unknown'
-
-    analytics.finding({
-      rule_id: f.rule,
-      severity: f.severity,
-      file_hash: fileHash,
-      locator: f.locator || 'L0',
-      signals: {
-        provider_conf: (f as any).providerConfidence,
-        rule_conf: (f as any).ruleConfidence,
+      runId,
+      actor: ANALYTICS_ACTOR,
+      ctx: {
+        workspace: REPO_ROOT,
+        provider: providerLabel,
+        profile: opts.profile,
       },
-    })
-  }
+    },
+    async (emit: (event: Partial<AnalyticsEventV1>) => Promise<EmitResult>) => {
+      try {
+        // Track command start
+        await emit({
+          type: ANALYTICS_EVENTS.REVIEW_STARTED,
+          payload: {
+            provider: providerLabel,
+            profile: opts.profile,
+            maxComments: opts.maxComments,
+            failOn: opts.failOn,
+          },
+        })
 
-  await analytics.finish({
-    duration_ms: Date.now() - startedAt,
-    findings_total: findings.length,
-    findings_by_severity: counts,
-  })
+        // ── Основной review через провайдера
+        const review: ReviewJson = await provider.review({
+          diffText,
+          profile: opts.profile,
+          rules: rulesRaw,
+          boundaries,
+        })
 
-  process.exit(exit.exitCode)
+        // Канонизируем run_id
+        review.ai_review.run_id = runId
+
+        // cap findings: cli flag > ENV
+        const envCap = process.env.AI_REVIEW_MAX_COMMENTS ? Number(process.env.AI_REVIEW_MAX_COMMENTS) : undefined
+        const cap = Number.isFinite(opts.maxComments as number)
+          ? (opts.maxComments as number)
+          : Number.isFinite(envCap as number)
+          ? (envCap as number)
+          : undefined
+
+        review.ai_review.findings = capFindings(
+          review.ai_review.findings as unknown as { severity: Severity }[],
+          cap
+        ) as any
+
+        // артефакты JSON + Markdown транспорт
+        writeArtifacts(outJsonPath, outMdPath, review)
+
+        // summary + exit
+        const findings = review.ai_review.findings as unknown as {
+          severity: Severity
+          rule: string
+          file?: string
+          locator?: string
+        }[]
+
+        const top = maxSeverity(findings)
+        const exit = computeExit(top, opts.failOn)
+
+        printReviewSummary({
+          repoRoot: REPO_ROOT,
+          providerLabel,
+          profile: opts.profile,
+          outJsonPath,
+          outMdPath,
+          findings,
+          exit,
+        })
+
+        const totalTime = Date.now() - startTime
+        const counts: Record<Severity, number> = { critical: 0, major: 0, minor: 0, info: 0 }
+        
+        for (const f of findings) {
+          counts[f.severity] = (counts[f.severity] ?? 0) + 1
+        }
+
+        // Track command completion
+        await emit({
+          type: ANALYTICS_EVENTS.REVIEW_FINISHED,
+          payload: {
+            provider: providerLabel,
+            profile: opts.profile,
+            findingsTotal: findings.length,
+            findingsBySeverity: counts,
+            topSeverity: top || 'none',
+            exitCode: exit.exitCode,
+            durationMs: totalTime,
+            result: exit.exitCode === 0 ? 'success' : 'failed',
+          },
+        })
+
+        process.exit(exit.exitCode)
+      } catch (error: any) {
+        const totalTime = Date.now() - startTime
+
+        // Track command failure
+        await emit({
+          type: ANALYTICS_EVENTS.REVIEW_FINISHED,
+          payload: {
+            provider: providerLabel,
+            profile: opts.profile,
+            durationMs: totalTime,
+            result: 'error',
+            error: error.message || String(error),
+          },
+        })
+
+        throw error
+      }
+    }
+  )
 }
