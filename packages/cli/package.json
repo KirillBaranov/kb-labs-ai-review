@@ -30,6 +30,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@kb-labs/analytics-sdk-node": "link:../../../kb-labs-analytics/packages/analytics-sdk-node",
     "@kb-labs/ai-review-core": "link:../core",
     "@kb-labs/ai-review-provider-types": "workspace:*",
     "@kb-labs/ai-review-provider-mock": "workspace:*",
