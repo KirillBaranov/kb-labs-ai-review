@@ -63,7 +63,7 @@ describe('violatesRule', () => {
   })
 
   it('returns true when from matches and to matches', () => {
-    const edge = make()
+    const edge = make({})
     expect(violatesRule(edge, baseRule)).toBe(true)
   })
 

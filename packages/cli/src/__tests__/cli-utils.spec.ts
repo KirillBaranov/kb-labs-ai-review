@@ -14,7 +14,7 @@ import {
   sevRank,
 } from '../cli-utils'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import type { Severity } from '@kb-labs/ai-review-core'
+import type { Severity } from '@kb-labs/shared-review-types'
 
 const spyLog = () => {
   const logs: string[] = []

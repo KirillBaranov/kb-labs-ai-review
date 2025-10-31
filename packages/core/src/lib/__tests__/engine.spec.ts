@@ -1,9 +1,10 @@
 
 import { describe, it, expect } from 'vitest'
 import { analyzeDiff, defaultMetaFor } from '../engine'
-import { makeFingerprint, type ReviewFinding } from '../normalize'
+import { makeFingerprint } from '../normalize'
+import type { ReviewFinding } from '@kb-labs/shared-review-types'
 import type { BoundariesConfig } from '../boundaries'
-import type { RuleItem } from '../types'
+import type { RuleItem } from '@kb-labs/shared-review-types'
 
 function makeDiff(text: string, file = 'src/features/a/file.ts') {
   return [
@@ -46,6 +47,8 @@ describe('analyzeDiff', () => {
     const findings = analyzeDiff({ diffText: diff })
     expect(findings).toHaveLength(1)
     const f = findings[0]
+    expect(f).toBeDefined()
+    if (!f) return
     expect(f.rule).toBe('style.no-todo-comment')
     expect(f.locator).toBe('L1')
     expect(f.finding[0]).toMatch(/TODO/)
@@ -81,6 +84,8 @@ describe('analyzeDiff', () => {
     const findings = analyzeDiff({ diffText: diff, rulesById: rules })
     expect(findings).toHaveLength(1)
     const f = findings[0]
+    expect(f).toBeDefined()
+    if (!f) return
     expect(f.rule).toBe('arch.modular-boundaries')
     expect(f.area).toBe('Architecture')
     expect(f.severity).toBe('critical')
@@ -117,6 +122,8 @@ describe('analyzeDiff', () => {
     const findings = analyzeDiff({ diffText: diff, rulesById: rules, boundaries })
     expect(findings).toHaveLength(1)
     const f = findings[0]
+    expect(f).toBeDefined()
+    if (!f) return
     expect(f.rule).toBe('boundaries.feature-to-feature-internal')
     expect(f.area).toBe('Architecture')
     expect(f.severity).toBe('major')
@@ -131,8 +138,23 @@ describe('analyzeDiff', () => {
   })
 
   it('generates distinct fingerprints for different findings', () => {
-    const diff = makeDiff('// TODO: one') + '\n' + makeDiff('// TODO: two')
+    const diff = [
+      'diff --git a/file1.ts b/file1.ts',
+      'index 000..111 100644',
+      '--- a/file1.ts',
+      '+++ b/file1.ts',
+      '@@ -1,0 +1,1 @@',
+      '+// TODO: one',
+      'diff --git a/file2.ts b/file2.ts',
+      'index 222..333 100644',
+      '--- a/file2.ts',
+      '+++ b/file2.ts',
+      '@@ -1,0 +1,1 @@',
+      '+// TODO: two',
+      '',
+    ].join('\n')
     const findings = analyzeDiff({ diffText: diff })
+    expect(findings.length).toBeGreaterThanOrEqual(2)
     const fps = findings.map(f => f.fingerprint)
     expect(new Set(fps).size).toBe(fps.length)
   })

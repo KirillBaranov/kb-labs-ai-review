@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { groupBySeverity, sha1, makeFingerprint, type ReviewFinding } from '../normalize'
+import { groupBySeverity, sha1, makeFingerprint } from '../normalize'
+import type { ReviewFinding } from '@kb-labs/shared-review-types'
 
 describe('groupBySeverity', () => {
   const base = {

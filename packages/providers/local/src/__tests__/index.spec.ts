@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { localProvider } from '../index'
 import type { BoundariesConfig } from '@kb-labs/ai-review-core'
-import type { RulesJson } from '@kb-labs/ai-review-core'
+import type { RulesJson } from '@kb-labs/shared-review-types'
 
 function makeDiff(text: string, file = 'src/features/a/file.ts') {
   return [
@@ -97,6 +97,8 @@ describe('@kb-labs/ai-review-provider-local', () => {
     })
 
     const f = res.ai_review.findings[0]
+    expect(f).toBeDefined()
+    if (!f) return
     expect(f.rule).toBe('arch.modular-boundaries')
     expect(f.area).toBe('Architecture')
     expect(f.severity).toBe('critical')

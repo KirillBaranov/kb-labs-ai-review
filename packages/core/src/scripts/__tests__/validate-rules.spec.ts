@@ -7,13 +7,11 @@ import { describe, it, beforeEach, afterEach, expect } from 'vitest'
 // путь к TS-скрипту
 const SCRIPT = path.resolve(__dirname, '..', 'validate-rules.ts')
 
-// вызываем node с CLI tsx, найденным из package.json
+// ESM-compatible: use npx tsx for ESM modules
 const NODE_BIN = process.execPath
-const TSX_PKG_JSON = require.resolve('tsx/package.json')
-const TSX_PKG = JSON.parse(fs.readFileSync(TSX_PKG_JSON, 'utf8'))
-const TSX_BIN = path.join(path.dirname(TSX_PKG_JSON), TSX_PKG.bin?.tsx || TSX_PKG.bin)
+const TSX_CMD = 'tsx' // Use npx tsx via execFileSync
 
-function makeSandbox(prefix = 'sentinel-validate-rules-') {
+function makeSandbox(prefix = 'ai-review-validate-rules-') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), prefix))
   const cleanup = () => {
     try { fs.rmSync(root, { recursive: true, force: true }) } catch {}
@@ -62,8 +60,13 @@ function runScript(args: string[], opts?: ExecFileSyncOptions) {
     encoding: 'utf8',
     ...(opts || {}),
   }
-  // node <tsx-bin> <script> ...args
-  return execFileSync(NODE_BIN, [TSX_BIN, SCRIPT, ...args], execOpts) as unknown as string
+  // Use npx tsx for ESM compatibility
+  try {
+    return execFileSync('npx', ['tsx', SCRIPT, ...args], execOpts) as unknown as string
+  } catch (e: any) {
+    // If npx fails, try with node + tsx directly
+    throw e
+  }
 }
 
 describe('scripts/validate-rules.ts (process integration)', () => {

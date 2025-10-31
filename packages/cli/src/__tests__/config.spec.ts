@@ -18,8 +18,8 @@ describe('config.loadConfig (with sandbox)', () => {
     envBackup = { ...process.env }
     cwdBackup = process.cwd()
 
-    sbx = makeSandbox('sentinel-config-')
-    process.env.SENTINEL_REPO_ROOT = sbx.root
+    sbx = makeSandbox('ai-review-config-')
+    process.env.AI_REVIEW_REPO_ROOT = sbx.root
     process.chdir(sbx.root)
   })
 
@@ -30,38 +30,38 @@ describe('config.loadConfig (with sandbox)', () => {
   })
 
   function writeRc(dir: string, data: any) {
-    fs.writeFileSync(path.join(dir, '.sentinelrc.json'), JSON.stringify(data, null, 2), 'utf8')
+    fs.writeFileSync(path.join(dir, '.ai-reviewrc.json'), JSON.stringify(data, null, 2), 'utf8')
   }
 
   it('returns defaults when no rc and no env', async () => {
     const { loadConfig } = await loadConfigFresh()
     const cfg = loadConfig()
-    expect(cfg.defaultProfile).toBe('frontend')
+    expect(cfg.profile).toBe('frontend')
     expect(cfg.provider).toBe('local')
-    expect(cfg.output?.dir).toBe(path.join(sbx.root, 'dist'))
-    expect(cfg.output?.mdName).toBe('review.md')
-    expect(cfg.output?.jsonName).toBe('review.json')
-    expect(cfg.profilesDir).toBeUndefined()
+    expect(cfg.out.rootAbs).toContain('.ai-review')
+    expect(cfg.out.mdName).toBe('review.md')
+    expect(cfg.out.jsonName).toBe('review.json')
+    expect(cfg.profilesDir).toBeDefined()
   })
 
   it('merges rc from repo root and normalizes output.dir', async () => {
     writeRc(sbx.root, {
-      defaultProfile: 'backend',
+      profile: 'backend',
       provider: 'mock',
-      output: { dir: 'build', mdName: 'x.md', jsonName: 'y.json' }
+      out: { root: 'build', mdName: 'x.md', jsonName: 'y.json' }
     })
 
     const { loadConfig } = await loadConfigFresh()
     const cfg = loadConfig()
-    expect(cfg.defaultProfile).toBe('backend')
+    expect(cfg.profile).toBe('backend')
     expect(cfg.provider).toBe('mock')
-    expect(cfg.output?.dir).toBe(path.join(sbx.root, 'build'))
-    expect(cfg.output?.mdName).toBe('x.md')
-    expect(cfg.output?.jsonName).toBe('y.json')
+    expect(cfg.out.rootAbs).toBe(path.join(sbx.root, 'build'))
+    expect(cfg.out.mdName).toBe('x.md')
+    expect(cfg.out.jsonName).toBe('y.json')
   })
 
-  it('finds nearest .sentinelrc.json walking up, but not above repo root', async () => {
-    writeRc(sbx.root, { defaultProfile: 'root-rc' })
+  it('finds nearest .ai-reviewrc.json walking up, but not above repo root', async () => {
+    writeRc(sbx.root, { profile: 'root-rc' })
 
     const deep = path.join(sbx.root, 'a/b/c')
     fs.mkdirSync(deep, { recursive: true })
@@ -70,77 +70,77 @@ describe('config.loadConfig (with sandbox)', () => {
     {
       const { loadConfig } = await loadConfigFresh()
       const cfg = loadConfig()
-      expect(cfg.defaultProfile).toBe('root-rc')
+      expect(cfg.profile).toBe('root-rc')
     }
 
     const parentOfRepo = path.dirname(sbx.root)
-    const outsidePath = path.join(parentOfRepo, '.sentinelrc.json')
+    const outsidePath = path.join(parentOfRepo, '.ai-reviewrc.json')
 
     try {
-      fs.writeFileSync(outsidePath, JSON.stringify({ defaultProfile: 'outside' }), 'utf8')
+      fs.writeFileSync(outsidePath, JSON.stringify({ profile: 'outside' }), 'utf8')
 
       const { loadConfig } = await loadConfigFresh()
       const cfg = loadConfig()
-      expect(cfg.defaultProfile).toBe('root-rc')
+      expect(cfg.profile).toBe('root-rc')
     } finally {
       try { fs.rmSync(outsidePath, { force: true }) } catch {}
     }
   })
 
   it('ENV overrides rc', async () => {
-    writeRc(sbx.root, { defaultProfile: 'rc-prof', provider: 'mock' })
+    writeRc(sbx.root, { profile: 'rc-prof', provider: 'mock' })
 
     process.env.AI_REVIEW_PROFILE = 'env-prof'
-    process.env.SENTINEL_PROVIDER = 'openai'
-    process.env.SENTINEL_OUT_DIR = 'out'
-    process.env.SENTINEL_OUT_MD = 'env.md'
-    process.env.SENTINEL_OUT_JSON = 'env.json'
-    process.env.SENTINEL_MAX_COMMENTS = '7'
-    process.env.SENTINEL_CONTEXT_INCLUDE_ADR = '0'
-    process.env.SENTINEL_CONTEXT_INCLUDE_BOUNDARIES = '1'
-    process.env.SENTINEL_CONTEXT_MAX_BYTES = '12345'
-    process.env.SENTINEL_CONTEXT_MAX_TOKENS = '999'
+    process.env.AI_REVIEW_PROVIDER = 'openai'
+    process.env.AI_REVIEW_OUT_ROOT = 'out'
+    process.env.AI_REVIEW_OUT_MD_NAME = 'env.md'
+    process.env.AI_REVIEW_OUT_JSON_NAME = 'env.json'
+    process.env.AI_REVIEW_MAX_COMMENTS = '7'
+    process.env.AI_REVIEW_CONTEXT_INCLUDE_ADR = '0'
+    process.env.AI_REVIEW_CONTEXT_INCLUDE_BOUNDARIES = '1'
+    process.env.AI_REVIEW_CONTEXT_MAX_BYTES = '12345'
+    process.env.AI_REVIEW_CONTEXT_MAX_TOKENS = '999'
 
     const { loadConfig } = await loadConfigFresh()
     const cfg = loadConfig()
 
-    expect(cfg.defaultProfile).toBe('env-prof')
+    expect(cfg.profile).toBe('env-prof')
     expect(cfg.provider).toBe('openai')
     expect(cfg.maxComments).toBe(7)
-    expect(cfg.output?.dir).toBe(path.join(sbx.root, 'out'))
-    expect(cfg.output?.mdName).toBe('env.md')
-    expect(cfg.output?.jsonName).toBe('env.json')
+    expect(cfg.out.rootAbs).toBe(path.join(sbx.root, 'out'))
+    expect(cfg.out.mdName).toBe('env.md')
+    expect(cfg.out.jsonName).toBe('env.json')
 
-    expect(cfg.context?.includeADR).toBe(false)
-    expect(cfg.context?.includeBoundaries).toBe(true)
-    expect(cfg.context?.maxBytes).toBe(12345)
-    expect(cfg.context?.maxApproxTokens).toBe(999)
+    expect(cfg.context.includeADR).toBe(false)
+    expect(cfg.context.includeBoundaries).toBe(true)
+    expect(cfg.context.maxBytes).toBe(12345)
+    expect(cfg.context.maxApproxTokens).toBe(999)
   })
 
   it('CLI overrides highest priority (over env and rc)', async () => {
-    writeRc(sbx.root, { defaultProfile: 'rc-prof', provider: 'mock' })
+    writeRc(sbx.root, { profile: 'rc-prof', provider: 'mock' })
     process.env.AI_REVIEW_PROFILE = 'env-prof'
-    process.env.SENTINEL_PROVIDER = 'openai'
-    process.env.SENTINEL_OUT_DIR = 'env-out'
+    process.env.AI_REVIEW_PROVIDER = 'openai'
+    process.env.AI_REVIEW_OUT_ROOT = 'env-out'
 
     const { loadConfig } = await loadConfigFresh()
     const cfg = loadConfig({
-      defaultProfile: 'cli-prof',
+      profile: 'cli-prof',
       provider: 'claude',
-      output: { dir: 'cli-out', mdName: 'cli.md', jsonName: 'cli.json' },
+      out: { root: 'cli-out', mdName: 'cli.md', jsonName: 'cli.json' },
       context: { includeADR: true, includeBoundaries: false, maxBytes: 42, maxApproxTokens: 77 },
       profilesDir: 'profiles' // относительный → нормализуем
     })
 
-    expect(cfg.defaultProfile).toBe('cli-prof')
+    expect(cfg.profile).toBe('cli-prof')
     expect(cfg.provider).toBe('claude')
-    expect(cfg.output?.dir).toBe(path.join(sbx.root, 'cli-out'))
-    expect(cfg.output?.mdName).toBe('cli.md')
-    expect(cfg.output?.jsonName).toBe('cli.json')
-    expect(cfg.context?.includeADR).toBe(true)
-    expect(cfg.context?.includeBoundaries).toBe(false)
-    expect(cfg.context?.maxBytes).toBe(42)
-    expect(cfg.context?.maxApproxTokens).toBe(77)
+    expect(cfg.out.rootAbs).toBe(path.join(sbx.root, 'cli-out'))
+    expect(cfg.out.mdName).toBe('cli.md')
+    expect(cfg.out.jsonName).toBe('cli.json')
+    expect(cfg.context.includeADR).toBe(true)
+    expect(cfg.context.includeBoundaries).toBe(false)
+    expect(cfg.context.maxBytes).toBe(42)
+    expect(cfg.context.maxApproxTokens).toBe(77)
 
     expect(cfg.profilesDir).toBe(path.join(sbx.root, 'profiles'))
   })

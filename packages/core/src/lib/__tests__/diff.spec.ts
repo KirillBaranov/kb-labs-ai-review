@@ -1,6 +1,7 @@
 // packages/core/src/lib/__tests__/diff.spec.ts
 import { describe, it, expect } from 'vitest'
-import { parseUnifiedDiff, hunkLocator } from '../diff'
+import { parseUnifiedDiff } from '@kb-labs/shared-diff'
+import { parsedDiffToFileDiffs, hunkLocator } from '../diff-adapter'
 
 describe('parseUnifiedDiff', () => {
   it('parses single file with one hunk and added lines', () => {
@@ -17,14 +18,19 @@ describe('parseUnifiedDiff', () => {
       '',
     ].join('\n')
 
-    const files = parseUnifiedDiff(diff)
+    const parsed = parseUnifiedDiff(diff)
+    const files = parsedDiffToFileDiffs(parsed)
     expect(files.length).toBe(1)
 
     const f = files[0]
+    expect(f).toBeDefined()
+    if (!f) return
     expect(f.filePath).toBe('src/a.ts')
     expect(f.hunks.length).toBe(1)
 
     const h = f.hunks[0]
+    expect(h).toBeDefined()
+    if (!h) return
     expect(h.header).toContain('@@ -1,3 +1,4 @@')
     // added lines should be captured with NEW file line numbers
     expect(h.added).toEqual([
@@ -50,12 +56,16 @@ describe('parseUnifiedDiff', () => {
       '',
     ].join('\n')
 
-    const [file] = parseUnifiedDiff(diff)
+    const parsed = parseUnifiedDiff(diff)
+    const files = parsedDiffToFileDiffs(parsed)
+    const file = files[0]
+    expect(file).toBeDefined()
+    if (!file) return
     expect(file.filePath).toBe('src/a.ts')
     expect(file.hunks.length).toBe(2)
 
-    expect(file.hunks[0].added).toEqual([{ line: 2, text: 'const a = 1' }])
-    expect(file.hunks[1].added).toEqual([
+    expect(file.hunks[0]?.added).toEqual([{ line: 2, text: 'const a = 1' }])
+    expect(file.hunks[1]?.added).toEqual([
       { line: 10, text: '  const z = 2' },
       { line: 11, text: '  return z' },
     ])
@@ -79,10 +89,16 @@ describe('parseUnifiedDiff', () => {
       '',
     ].join('\n')
 
-    const files = parseUnifiedDiff(diff)
+    const parsed = parseUnifiedDiff(diff)
+    const files = parsedDiffToFileDiffs(parsed)
     expect(files.map(f => f.filePath)).toEqual(['src/a.ts', 'src/b.ts'])
-    expect(files[0].hunks[0].added).toEqual([{ line: 1, text: 'const a = 1' }])
-    expect(files[1].hunks[0].added).toEqual([{ line: 6, text: 'const b = 2' }])
+    const file0 = files[0]
+    const file1 = files[1]
+    expect(file0).toBeDefined()
+    expect(file1).toBeDefined()
+    if (!file0 || !file1) return
+    expect(file0.hunks[0]?.added).toEqual([{ line: 1, text: 'const a = 1' }])
+    expect(file1.hunks[0]?.added).toEqual([{ line: 6, text: 'const b = 2' }])
   })
 
   it('supports hunk headers without lengths (e.g. "@@ -5 +6 @@")', () => {
@@ -95,11 +111,17 @@ describe('parseUnifiedDiff', () => {
       '',
     ].join('\n')
 
-    const [file] = parseUnifiedDiff(diff)
+    const parsed = parseUnifiedDiff(diff)
+    const files = parsedDiffToFileDiffs(parsed)
+    const file = files[0]
+    expect(file).toBeDefined()
+    if (!file) return
     expect(file.filePath).toBe('src/c.ts')
     expect(file.hunks.length).toBe(1)
 
     const h = file.hunks[0]
+    expect(h).toBeDefined()
+    if (!h) return
     // lengths should default to 0 per implementation
     expect({ oldStart: h.oldStart, oldLines: h.oldLines, newStart: h.newStart, newLines: h.newLines })
       .toEqual({ oldStart: 5, oldLines: 0, newStart: 6, newLines: 0 })
@@ -117,9 +139,13 @@ describe('parseUnifiedDiff', () => {
       '',
     ].join('\r\n')
 
-    const [file] = parseUnifiedDiff(crlf)
+    const parsed = parseUnifiedDiff(crlf)
+    const files = parsedDiffToFileDiffs(parsed)
+    const file = files[0]
+    expect(file).toBeDefined()
+    if (!file) return
     expect(file.filePath).toBe('src/crlf.ts')
-    expect(file.hunks[0].added).toEqual([
+    expect(file.hunks[0]?.added).toEqual([
       { line: 1, text: 'line1' },
       { line: 2, text: 'line2' },
     ])
@@ -135,9 +161,13 @@ describe('parseUnifiedDiff', () => {
       '',
     ].join('\n')
 
-    const [file] = parseUnifiedDiff(diff)
+    const parsed = parseUnifiedDiff(diff)
+    const files = parsedDiffToFileDiffs(parsed)
+    const file = files[0]
+    expect(file).toBeDefined()
+    if (!file) return
     expect(file.filePath).toBe('real/file.ts')
-    expect(file.hunks[0].added).toEqual([{ line: 1, text: 'x' }])
+    expect(file.hunks[0]?.added).toEqual([{ line: 1, text: 'x' }])
   })
 })
 

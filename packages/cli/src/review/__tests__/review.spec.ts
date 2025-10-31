@@ -40,13 +40,13 @@ describe('runReviewCLI (with sandbox)', () => {
   let envBackup: NodeJS.ProcessEnv
 
   beforeEach(() => {
-    sbx = makeSandbox('sentinel-review-')
+    sbx = makeSandbox('ai-review-')
     makeProfile(sbx.root, 'frontend')
     envBackup = { ...process.env }
 
-    exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: any) => {
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: any) => {
       throw new Error(`__exit__:${code ?? 0}`)
-    }) as any)
+    }) as any
   })
 
   afterEach(() => {
@@ -76,12 +76,12 @@ describe('runReviewCLI (with sandbox)', () => {
     expect(json?.ai_review?.findings?.length).toBe(3)
 
     const md = fs.readFileSync(outMd, 'utf8')
-    expect(md).toMatch(/<!-- SENTINEL:DUAL:JSON -->/)
+    expect(md).toMatch(/<!-- AI_REVIEW:DUAL:JSON -->/)
     expect(md).toMatch(/```json/)
   })
 
-  it('caps findings by SENTINEL_MAX_COMMENTS when set', async () => {
-    process.env.SENTINEL_MAX_COMMENTS = '2'
+  it('caps findings by AI_REVIEW_MAX_COMMENTS when set', async () => {
+    process.env.AI_REVIEW_MAX_COMMENTS = '2'
 
     const outJson = outJsonAt(sbx.root)
 

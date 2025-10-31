@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderMarkdown } from '../render-md'
-import type { ReviewFinding } from '../normalize'
+import type { ReviewFinding } from '@kb-labs/shared-review-types'
 import type { RenderOptions } from '../render-config'
 
 function F(partial: Partial<ReviewFinding>): ReviewFinding {
@@ -88,7 +88,7 @@ describe('renderMarkdown (template mode)', () => {
     ], opts)
 
     // Заголовок отчета
-    expect(md.startsWith('# Sentinel AI Review')).toBe(true)
+    expect(md.startsWith('# KB Labs AI Review')).toBe(true)
 
     // Секция Info присутствует; строка по нашему шаблону — тоже
     const infoSec = md.split('\n## ').find(s => /Info/.test(s))!
