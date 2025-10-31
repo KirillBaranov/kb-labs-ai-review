@@ -19,6 +19,7 @@ Designed to catch architectural and stylistic issues beyond static linters.
   - `@kb-labs/ai-review-cli` → developer interface and CI integration.
 - **AI-assisted findings**: complex cases beyond ESLint/TypeScript.
 - **Workspace-friendly**: built with `pnpm` monorepo.
+- **KB Labs Platform integration**: uses `@kb-labs/shared`, `@kb-labs/core`, and `@kb-labs/cli` for unified tooling.
 
 ---
 
@@ -33,10 +34,28 @@ cd kb-labs-ai-review
 pnpm install
 
 # build AI context (frontend profile)
-pnpm sentinel:context
+kb ai-review build-context --profile frontend
 
 # run review on demo diff
-pnpm sentinel:review
+kb ai-review review --diff fixtures/changes.diff --profile frontend
+```
+
+### Using via @kb-labs/cli
+
+AI Review commands are registered in `@kb-labs/cli`:
+
+```bash
+# Show available commands
+kb ai-review --help
+
+# Review code changes
+kb ai-review review --diff changes.diff --profile frontend
+
+# Build context
+kb ai-review build-context --profile frontend
+
+# Render results
+kb ai-review render-md --in review.json --out review.md
 ```
 
 ### Outputs:
@@ -61,6 +80,19 @@ analytics/      # schema + aggregator
 *	Add provider integrations (OpenAI, Claude).
 *	GitHub Actions bot → comment reviews in PR.
 *	Web dashboard for metrics & trends.
+
+⸻
+
+## 📚 Documentation
+
+- [Migration Guide](./docs/MIGRATION.md) - Guide for migrating from legacy architecture
+- [ADR-0001: Migrate to KB Labs Platform](./docs/adr/0001-migrate-to-kb-labs-platform.md) - Migration decision record
+- [CLI README](./packages/cli/README.md) - CLI package documentation
+
+### Platform ADRs
+
+- [KB Labs Platform Sync/Drift Check](https://github.com/kirill-baranov/kb-labs-devkit#sync--drift-check) - DevKit sync and drift-check system
+- [ESM-only Architecture](https://github.com/kirill-baranov/kb-labs-devkit#esm-only) - ESM-only module standard
 
 ⸻
 

@@ -28,7 +28,7 @@ pnpm ai-review --help
 ### build-context
 Build a full context file (used as prompt grounding for providers).
 ```bash
-pnpm sentinel build-context --profile frontend --profiles-dir packages/profiles --out dist/ai-review-context.md
+kb ai-review build-context --profile frontend --profiles-dir packages/profiles --out dist/ai-review-context.md
 ```
 
 **Options:**
@@ -61,7 +61,7 @@ pnpm sentinel review \
 ### render-md
 Convert review.json to a readable Markdown report.
 ```bash
-pnpm sentinel render-md --in dist/review.json --out dist/review.human.md
+kb ai-review render-md --in dist/review.json --out dist/review.human.md
 ```
 
 **Options:**
@@ -71,16 +71,16 @@ pnpm sentinel render-md --in dist/review.json --out dist/review.human.md
 ### render-html
 Convert review.json to an HTML report.
 ```bash
-pnpm sentinel render-html --in dist/review.json --out dist/review.html
+kb ai-review render-html --in dist/review.json --out dist/review.html
 ```
 
 ## Output formats
 
 **Dual file (review.md)**
 ```md
-<!-- SENTINEL:DUAL:JSON -->
+<!-- AI_REVIEW:DUAL:JSON -->
 { "ai_review": { "version": 1, "findings": [ ... ] } }
-<!-- SENTINEL:DUAL:JSON:END -->
+<!-- AI_REVIEW:DUAL:JSON:END -->
 ```
 
 **Canonical JSON (`review.json`)**
@@ -98,9 +98,9 @@ pnpm sentinel render-html --in dist/review.json --out dist/review.html
 
 Minimal example for GitHub Actions:
 ```yml
-- name: Run Sentinel review
+- name: Run AI Review
   run: |
-    pnpm sentinel review \
+    kb ai-review review \
       --diff diff.patch \
       --profile frontend \
       --provider local \
@@ -115,7 +115,7 @@ Minimal example for GitHub Actions:
 - or forced failure with `--fail-on`.
 
 ## Notes
-*	This package is the entrypoint for users of Sentinel AI.
+*	This package is the entrypoint for users of KB Labs AI Review.
 *	Profiles (rules/handbook/boundaries) are external to CLI — you provide your own.
 
 

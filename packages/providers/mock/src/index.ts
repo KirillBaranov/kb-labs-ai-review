@@ -1,5 +1,5 @@
 import type { ReviewProvider, ProviderReviewInput } from '@kb-labs/ai-review-provider-types'
-import type { ReviewJson, ReviewFinding, Severity } from '@kb-labs/ai-review-core'
+import type { ReviewJson, ReviewFinding, Severity } from '@kb-labs/shared-review-types'
 
 export const mockProvider: ReviewProvider = {
   name: 'mock',
