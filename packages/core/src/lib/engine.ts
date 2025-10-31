@@ -1,8 +1,12 @@
-import { parseUnifiedDiff } from './diff'
+import { parseUnifiedDiff as parseUnifiedDiffShared } from '@kb-labs/shared-diff'
+import { parsedDiffToFileDiffs } from './diff-adapter'
 import { makeFingerprint } from './normalize'
 import type { RulesJson, RuleItem, ReviewFinding } from './types'
 import type { BoundariesConfig } from './boundaries'
 import { extractImportSpecifier, checkForbidden, toPosix } from './boundaries'
+import { getLogger } from '@kb-labs/core-sys'
+
+const log = getLogger('ai-review:engine')
 
 export type EngineInput = {
   diffText: string
@@ -21,9 +25,18 @@ export function defaultMetaFor(
 }
 
 export function analyzeDiff(input: EngineInput): ReviewFinding[] {
-  const files = parseUnifiedDiff(input.diffText)
+  log.debug('starting diff analysis', {
+    hasRules: !!input.rulesJson,
+    hasBoundaries: !!input.boundaries,
+    diffLength: input.diffText.length,
+  })
+
+  const parsed = parseUnifiedDiffShared(input.diffText)
+  const files = parsedDiffToFileDiffs(parsed)
   const rulesById = input.rulesById
   const findings: ReviewFinding[] = []
+
+  log.debug('parsed diff', { fileCount: files.length })
 
   for (const f of files) {
     for (const h of f.hunks) {
@@ -103,5 +116,6 @@ export function analyzeDiff(input: EngineInput): ReviewFinding[] {
     }
   }
 
+  log.debug('analysis complete', { findingsCount: findings.length })
   return findings
 }
