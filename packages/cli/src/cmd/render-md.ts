@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import type { ReviewJson, ReviewFinding } from '@kb-labs/ai-review-core'
+import type { ReviewJson, ReviewFinding } from '@kb-labs/shared-review-types'
 import {
   findRepoRoot,
   ensureDirForFile,
@@ -67,7 +67,7 @@ export function renderMarkdownFromJson(json: ReviewJson) {
   const order: Sev[] = ['critical', 'major', 'minor', 'info']
   const body = order.map((s) => renderSection(s, bySev[s] || [])).join('\n')
 
-  const header = `# Sentinel AI Review — ${json.ai_review?.run_id ?? 'run'}\n`
+  const header = `# KB Labs AI Review — ${json.ai_review?.run_id ?? 'run'}\n`
   return `${header}\n${body}\n---\nFeedback: 👍 Relevant | 👎 Noisy (explain)\n`
 }
 

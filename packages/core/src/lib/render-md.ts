@@ -1,4 +1,4 @@
-import type { Severity, ReviewFinding } from './types';
+import type { Severity, ReviewFinding } from '@kb-labs/shared-review-types';
 import { DEFAULT_SEVERITY_MAP, type RenderOptions } from './render-config';
 
 type Grouped = Record<Severity, ReviewFinding[]>;
@@ -41,15 +41,16 @@ export function renderMarkdown(
   const grouped = groupFindings(findings, order);
 
   if (opts.template) {
-    const lines: string[] = ['# Sentinel AI Review'];
+    const lines: string[] = ['# KB Labs AI Review'];
     for (const s of order) {
       const label = `${map.icon?.[s] ? map.icon![s] + ' ' : ''}${map.title[s]}`;
       lines.push(`\n## ${label}`);
-      if (grouped[s].length === 0) { lines.push(`- ✅ No issues found`); continue; }
-      for (const f of grouped[s]) {
-        const ctx = {
+      const findingsForSeverity = grouped[s];
+      if (!findingsForSeverity || findingsForSeverity.length === 0) { lines.push(`- ✅ No issues found`); continue; }
+      for (const f of findingsForSeverity) {
+        const ctx: Record<string, string> = {
           severity: s,
-          severity_title: map.title[s],
+          severity_title: map.title[s] || '',
           severity_icon: map.icon?.[s] ?? '',
           rule: f.rule,
           area: f.area ?? '',
@@ -66,12 +67,12 @@ export function renderMarkdown(
     return lines.join('\n');
   }
 
-  const out: string[] = ['# Sentinel AI Review'];
+  const out: string[] = ['# KB Labs AI Review'];
   for (const s of order) {
     const label = `${map.icon?.[s] ? map.icon![s] + ' ' : ''}${map.title[s]}`;
     out.push(`\n## ${label}`);
     const arr = grouped[s];
-    if (arr.length === 0) { out.push(`- ✅ No issues found`); continue; }
+    if (!arr || arr.length === 0) { out.push(`- ✅ No issues found`); continue; }
 
     const byArea = new Map<string, ReviewFinding[]>();
     for (const f of arr) {

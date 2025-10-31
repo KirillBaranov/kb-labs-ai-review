@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import type { ReviewJson } from '@kb-labs/ai-review-core'
+import type { ReviewJson } from '@kb-labs/shared-review-types'
 import { renderMarkdownFromJson } from './render-md'
 import {
   findRepoRoot,
@@ -158,7 +158,7 @@ export async function renderHtmlCLI(opts: { inFile: string; outFile: string }) {
 
   const runId = (json as any)?.ai_review?.run_id
   const profile = (json as any)?.ai_review?.profile || (json as any)?.meta?.profile
-  const title = `Sentinel AI Review${profile ? ` — ${profile}` : ''}${runId ? ` (#${runId.slice(0,8)})` : ''}`
+  const title = `KB Labs AI Review${profile ? ` — ${profile}` : ''}${runId ? ` (#${runId.slice(0,8)})` : ''}`
 
   const html = wrapHtml(title, md)
 
