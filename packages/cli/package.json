@@ -35,6 +35,10 @@
     "@kb-labs/ai-review-provider-mock": "workspace:*",
     "@kb-labs/ai-review-provider-local": "workspace:*",
     "@kb-labs/ai-review-analytics": "link:../analytics",
+    "@kb-labs/core-sys": "link:../../../kb-labs-core/packages/sys",
+    "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/review-types",
+    "@kb-labs/cli-core": "link:../../../kb-labs-cli/packages/core",
+    "@kb-labs/cli-commands": "link:../../../kb-labs-cli/packages/commands",
     "commander": "^12.1.0",
     "colorette": "^2.0.20"
   },
