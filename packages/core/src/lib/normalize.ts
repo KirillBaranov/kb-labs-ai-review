@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import type { Severity, ReviewFinding } from './types'
+import type { Severity, ReviewFinding } from '@kb-labs/shared-review-types'
 
 /** Группировка по severity в каноническом порядке */
 export function groupBySeverity(findings: ReviewFinding[]) {

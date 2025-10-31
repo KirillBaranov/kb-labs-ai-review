@@ -1,4 +1,4 @@
-import type { Severity } from './types';
+import type { Severity } from '@kb-labs/shared-review-types';
 
 export interface SeverityMap {
   title: Record<Severity, string>;

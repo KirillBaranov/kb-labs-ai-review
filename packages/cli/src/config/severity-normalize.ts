@@ -1,4 +1,5 @@
-import type { Severity, SeverityMap } from '@kb-labs/ai-review-core';
+import type { Severity } from '@kb-labs/shared-review-types';
+import type { SeverityMap } from '@kb-labs/ai-review-core';
 import { DEFAULT_SEVERITY_MAP } from '@kb-labs/ai-review-core';
 
 const SEVERITIES: Severity[] = ['critical', 'major', 'minor', 'info'];

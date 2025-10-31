@@ -2,7 +2,7 @@ import type {
   ReviewJson,
   ReviewFinding,
   RulesJson,
-} from '@kb-labs/ai-review-core'
+} from '@kb-labs/shared-review-types'
 
 export type ProviderBoundaries = unknown
 

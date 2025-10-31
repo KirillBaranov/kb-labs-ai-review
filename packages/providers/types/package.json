@@ -16,7 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@kb-labs/ai-review-core": "workspace:*"
+    "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/review-types"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

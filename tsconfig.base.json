@@ -1,5 +1,5 @@
 {
-  "extends": "@kb-labs/devkit/tsconfig/base.json",
+  "extends": "@kb-labs/devkit/tsconfig/node.json",
   "compilerOptions": {
     "declaration": true,
     "declarationMap": false,
@@ -17,7 +17,9 @@
       "@kb-labs/ai-review-provider-mock": ["packages/providers/mock/dist"],
       "@kb-labs/ai-review-provider-mock/*": ["packages/providers/mock/dist/*"],
       "@kb-labs/ai-review-provider-local": ["packages/providers/local/dist"],
-      "@kb-labs/ai-review-provider-local/*": ["packages/providers/local/dist/*"]
+      "@kb-labs/ai-review-provider-local/*": ["packages/providers/local/dist/*"],
+      "@kb-labs/shared-review-types": ["../kb-labs-shared/packages/review-types/dist"],
+      "@kb-labs/shared-review-types/*": ["../kb-labs-shared/packages/review-types/dist/*"]
     }
   }
 }
