@@ -36,5 +36,4 @@ coverage/
 *.snap
 
 # KB Labs Artifacts
-kb-labs/DEVKIT_SYNC.json
-kb-labs/DEVKIT_CHECK.json
+.kb/devkit/tmp/
