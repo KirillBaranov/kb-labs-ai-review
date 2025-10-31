@@ -3,10 +3,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { findRepoRoot } from '../cli-utils'
 
-export type FailOn = 'major' | 'critical'
+export type FailOn = 'none' | 'major' | 'critical'
 export type ProviderName = 'local' | 'mock' | 'openai' | 'claude'
 
-export interface SentinelRc {
+export interface AiReviewRc {
   profile?: string
   provider?: ProviderName
   /** profiles root, e.g. "packages/profiles" */
@@ -64,7 +64,7 @@ export interface ResolvedConfig {
   provider: ProviderName
   profilesDir: string
 
-  failOn: FailOn
+  failOn: FailOn | 'none'
   maxComments?: number
 
   out: {
@@ -82,7 +82,7 @@ export interface ResolvedConfig {
     severityMap?: Record<string, string>
   }
 
-  context: Required<Pick<NonNullable<SentinelRc['context']>, 'includeADR' | 'includeBoundaries' | 'maxBytes' | 'maxApproxTokens'>>
+  context: Required<Pick<NonNullable<AiReviewRc['context']>, 'includeADR' | 'includeBoundaries' | 'maxBytes' | 'maxApproxTokens'>>
 
   analytics: {
     enabled: boolean
@@ -103,23 +103,23 @@ function readJsonSafe(p: string): any | null {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')) } catch { return null }
 }
 
-/** Ищем ближайший .sentinelrc.json от CWD вверх до корня репо */
+/** Ищем ближайший .ai-reviewrc.json от CWD вверх до корня репо */
 function findRc(startDir = process.cwd(), repoRoot = REPO_ROOT): string | null {
   let dir = path.resolve(startDir)
   while (true) {
-    const candidate = path.join(dir, '.sentinelrc.json')
+    const candidate = path.join(dir, '.ai-reviewrc.json')
     if (fs.existsSync(candidate)) return candidate
     const parent = path.dirname(dir)
     if (parent === dir) break
     if (dir === repoRoot) break
     dir = parent
   }
-  const fallback = path.join(repoRoot, '.sentinelrc.json')
+  const fallback = path.join(repoRoot, '.ai-reviewrc.json')
   return fs.existsSync(fallback) ? fallback : null
 }
 
 /** Глубокий merge только для 1 уровня вложенности (out/render/context/analytics) */
-function mergeRc(base: SentinelRc, over?: SentinelRc): SentinelRc {
+function mergeRc(base: AiReviewRc, over?: AiReviewRc): AiReviewRc {
   if (!over) return base
   return {
     ...base,
@@ -132,23 +132,23 @@ function mergeRc(base: SentinelRc, over?: SentinelRc): SentinelRc {
 }
 
 /** ENV → RC (только новый стандарт ключей) */
-function envAsRc(): SentinelRc {
-  const out: SentinelRc = {}
+function envAsRc(): AiReviewRc {
+  const out: AiReviewRc = {}
 
   if (process.env.AI_REVIEW_PROFILE) out.profile = process.env.AI_REVIEW_PROFILE
   if (process.env.AI_REVIEW_PROFILES_DIR) out.profilesDir = process.env.AI_REVIEW_PROFILES_DIR as string
-  if (process.env.SENTINEL_PROVIDER) out.provider = process.env.SENTINEL_PROVIDER as ProviderName
-  if (process.env.SENTINEL_FAIL_ON) out.failOn = process.env.SENTINEL_FAIL_ON as FailOn
-  if (process.env.SENTINEL_MAX_COMMENTS) out.maxComments = Number(process.env.SENTINEL_MAX_COMMENTS)
+  if (process.env.AI_REVIEW_PROVIDER) out.provider = process.env.AI_REVIEW_PROVIDER as ProviderName
+  if (process.env.AI_REVIEW_FAIL_ON) out.failOn = process.env.AI_REVIEW_FAIL_ON as FailOn
+  if (process.env.AI_REVIEW_MAX_COMMENTS) out.maxComments = Number(process.env.AI_REVIEW_MAX_COMMENTS)
 
   // out.*
-  const outRoot   = process.env.SENTINEL_OUT_ROOT
-  const outCtx    = process.env.SENTINEL_OUT_CONTEXT_DIR
-  const outRev    = process.env.SENTINEL_OUT_REVIEWS_DIR
-  const outAn     = process.env.SENTINEL_OUT_ANALYTICS_DIR
-  const outExp    = process.env.SENTINEL_OUT_EXPORTS_DIR
-  const outMdName = process.env.SENTINEL_OUT_MD_NAME
-  const outJsonNm = process.env.SENTINEL_OUT_JSON_NAME
+  const outRoot   = process.env.AI_REVIEW_OUT_ROOT
+  const outCtx    = process.env.AI_REVIEW_OUT_CONTEXT_DIR
+  const outRev    = process.env.AI_REVIEW_OUT_REVIEWS_DIR
+  const outAn     = process.env.AI_REVIEW_OUT_ANALYTICS_DIR
+  const outExp    = process.env.AI_REVIEW_OUT_EXPORTS_DIR
+  const outMdName = process.env.AI_REVIEW_OUT_MD_NAME
+  const outJsonNm = process.env.AI_REVIEW_OUT_JSON_NAME
   if (outRoot || outCtx || outRev || outAn || outExp || outMdName || outJsonNm) {
     out.out = {
       ...(out.out || {}),
@@ -163,10 +163,10 @@ function envAsRc(): SentinelRc {
   }
 
   // context.*
-  const includeADR        = process.env.SENTINEL_CONTEXT_INCLUDE_ADR
-  const includeBoundaries = process.env.SENTINEL_CONTEXT_INCLUDE_BOUNDARIES
-  const maxBytes          = process.env.SENTINEL_CONTEXT_MAX_BYTES
-  const maxTokens         = process.env.SENTINEL_CONTEXT_MAX_TOKENS
+  const includeADR        = process.env.AI_REVIEW_CONTEXT_INCLUDE_ADR
+  const includeBoundaries = process.env.AI_REVIEW_CONTEXT_INCLUDE_BOUNDARIES
+  const maxBytes          = process.env.AI_REVIEW_CONTEXT_MAX_BYTES
+  const maxTokens         = process.env.AI_REVIEW_CONTEXT_MAX_TOKENS
   if (includeADR || includeBoundaries || maxBytes || maxTokens) {
     out.context = {
       ...(out.context || {}),
@@ -178,11 +178,11 @@ function envAsRc(): SentinelRc {
   }
 
   // analytics.*
-  const anEnabled = process.env.SENTINEL_ANALYTICS
-  const anMode    = process.env.SENTINEL_ANALYTICS_MODE || process.env.SENTINEL_ANALYTICS_FILE_MODE
-  const anDir     = process.env.SENTINEL_ANALYTICS_DIR
-  const anSalt    = process.env.SENTINEL_ANALYTICS_SALT || process.env.SENTINEL_SALT
-  const anPriv    = process.env.SENTINEL_ANALYTICS_PRIVACY
+  const anEnabled = process.env.AI_REVIEW_ANALYTICS
+  const anMode    = process.env.AI_REVIEW_ANALYTICS_MODE || process.env.AI_REVIEW_ANALYTICS_FILE_MODE
+  const anDir     = process.env.AI_REVIEW_ANALYTICS_DIR
+  const anSalt    = process.env.AI_REVIEW_ANALYTICS_SALT || process.env.AI_REVIEW_SALT
+  const anPriv    = process.env.AI_REVIEW_ANALYTICS_PRIVACY
   if (anEnabled || anMode || anDir || anSalt || anPriv) {
     out.analytics = {
       ...(out.analytics || {}),
@@ -198,13 +198,13 @@ function envAsRc(): SentinelRc {
 }
 
 /** Значения по умолчанию — “хорошо и удобно” */
-const defaults: Required<Pick<SentinelRc,
+const defaults: Required<Pick<AiReviewRc,
   'profile' | 'provider' | 'out' | 'context' | 'analytics'
 >> = {
   profile: 'frontend',
   provider: 'local',
   out: {
-    root: '.sentinel',
+    root: '.ai-review',
     contextDir: 'context',
     reviewsDir: 'reviews',
     analyticsDir: 'analytics',
@@ -229,10 +229,17 @@ const defaults: Required<Pick<SentinelRc,
   },
 }
 
-/** Публичный загрузчик: defaults <- rc(file) <- env <- cli */
-export function loadConfig(cliOverrides?: SentinelRc): ResolvedConfig {
+/**
+ * Публичный загрузчик: defaults <- rc(file) <- env <- cli
+ * 
+ * TODO: Future migration to @kb-labs/core-bundle::loadBundle
+ * Once review.schema.json is extended with all AiReviewRc fields,
+ * we'll migrate to loadBundle for unified configuration system.
+ * See config-loader.ts for migration adapter skeleton.
+ */
+export function loadConfig(cliOverrides?: AiReviewRc): ResolvedConfig {
   const rcPath = findRc()
-  const fileRc = rcPath ? (readJsonSafe(rcPath) as SentinelRc || {}) : {}
+  const fileRc = rcPath ? (readJsonSafe(rcPath) as AiReviewRc || {}) : {}
 
   const merged = mergeRc(
     mergeRc(
@@ -248,7 +255,7 @@ export function loadConfig(cliOverrides?: SentinelRc): ResolvedConfig {
   const out = merged.out || {}
   const outRootAbs = path.isAbsolute(out.root || '')
     ? (out.root as string)
-    : path.join(repoRoot, out.root || '.sentinel')
+        : path.join(repoRoot, out.root || '.ai-review')
 
   const contextDirAbs   = path.join(outRootAbs, out.contextDir   ?? 'context')
   const reviewsDirAbs   = path.join(outRootAbs, out.reviewsDir   ?? 'reviews')
@@ -311,7 +318,7 @@ export function loadConfig(cliOverrides?: SentinelRc): ResolvedConfig {
       enabled: !!analytics.enabled,
       mode: analytics.mode ?? 'byDay',
       outDir: analyticsOutDirAbs,
-      salt: analytics.salt ?? 'sentinel',
+      salt: analytics.salt ?? 'ai-review',
       privacy: analytics.privacy ?? 'team',
       plugins: analytics.plugins,
       pluginConfig: analytics.pluginConfig,

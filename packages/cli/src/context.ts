@@ -179,7 +179,7 @@ export function buildContext(opts: BuildContextOptions) {
   // Sections
   const parts: string[] = []
   parts.push('---')
-  parts.push('title: Sentinel AI Review Context')
+  parts.push('title: KB Labs AI Review Context')
   parts.push(`profile: ${profile}`)
   parts.push(`generatedAt: ${ts}`)
   parts.push(`hashSeed: ${sha1(JSON.stringify(meta))}`)
@@ -187,8 +187,8 @@ export function buildContext(opts: BuildContextOptions) {
   parts.push('')
 
   // SUMMARY
-  parts.push('<!-- SENTINEL:SECTION:SUMMARY -->')
-  parts.push('# Sentinel AI — Review Context')
+  parts.push('<!-- AI_REVIEW:SECTION:SUMMARY -->')
+  parts.push('# KB Labs AI Review — Context')
   parts.push('')
   parts.push('This document is the single source of truth for the current review run. It includes the profile handbook, rules, and optional ADRs. Use it to ground AI-based review.')
   parts.push('')
@@ -196,11 +196,11 @@ export function buildContext(opts: BuildContextOptions) {
   parts.push('```json')
   parts.push(metaPretty)
   parts.push('```')
-  parts.push('<!-- SENTINEL:SECTION:SUMMARY:END -->')
+  parts.push('<!-- AI_REVIEW:SECTION:SUMMARY:END -->')
   parts.push('')
 
   // HANDBOOK
-  parts.push('<!-- SENTINEL:SECTION:HANDBOOK -->')
+  parts.push('<!-- AI_REVIEW:SECTION:HANDBOOK -->')
   parts.push('# Handbook')
   parts.push('')
   parts.push(buildTOC(hbBlobs, 'Handbook', PROFILES_DIR))
@@ -212,11 +212,11 @@ export function buildContext(opts: BuildContextOptions) {
     parts.push('---')
     parts.push('')
   }
-  parts.push('<!-- SENTINEL:SECTION:HANDBOOK:END -->')
+  parts.push('<!-- AI_REVIEW:SECTION:HANDBOOK:END -->')
   parts.push('')
 
   // RULES
-  parts.push('<!-- SENTINEL:SECTION:RULES -->')
+  parts.push('<!-- AI_REVIEW:SECTION:RULES -->')
   parts.push('# Rules')
   parts.push('')
   parts.push('> Source: `profiles/<profile>/docs/rules/rules.json`')
@@ -231,12 +231,12 @@ export function buildContext(opts: BuildContextOptions) {
     parts.push(boundariesPretty)
     parts.push('```')
   }
-  parts.push('<!-- SENTINEL:SECTION:RULES:END -->')
+  parts.push('<!-- AI_REVIEW:SECTION:RULES:END -->')
   parts.push('')
 
   // ADR
   if (includeADR && adrBlobs.length > 0) {
-    parts.push('<!-- SENTINEL:SECTION:ADR -->')
+    parts.push('<!-- AI_REVIEW:SECTION:ADR -->')
     parts.push('# ADR')
     parts.push('')
     parts.push(buildTOC(adrBlobs, 'ADR', PROFILES_DIR))
@@ -248,7 +248,7 @@ export function buildContext(opts: BuildContextOptions) {
       parts.push('---')
       parts.push('')
     }
-    parts.push('<!-- SENTINEL:SECTION:ADR:END -->')
+    parts.push('<!-- AI_REVIEW:SECTION:ADR:END -->')
     parts.push('')
   }
 
@@ -260,8 +260,8 @@ export function buildContext(opts: BuildContextOptions) {
     const tokens = approxTokens(output)
     if (tokens > maxApproxTokens) {
       output = output.replace(
-        /\n?<!-- SENTINEL:SECTION:ADR -->[\s\S]*?<!-- SENTINEL:SECTION:ADR:END -->/m,
-        '\n<!-- SENTINEL:SECTION:ADR -->\n# ADR\n\n*Omitted due to context size constraints.*\n<!-- SENTINEL:SECTION:ADR:END -->\n'
+        /\n?<!-- AI_REVIEW:SECTION:ADR -->[\s\S]*?<!-- AI_REVIEW:SECTION:ADR:END -->/m,
+        '\n<!-- AI_REVIEW:SECTION:ADR -->\n# ADR\n\n*Omitted due to context size constraints.*\n<!-- AI_REVIEW:SECTION:ADR:END -->\n'
       )
     }
   }
@@ -270,12 +270,12 @@ export function buildContext(opts: BuildContextOptions) {
   if (Buffer.byteLength(output, 'utf8') > maxBytes) {
     output = output
       .replace(
-        /<!-- SENTINEL:SECTION:HANDBOOK -->[\s\S]*?<!-- SENTINEL:SECTION:HANDBOOK:END -->/m,
-        '<!-- SENTINEL:SECTION:HANDBOOK -->\n# Handbook\n\n*Omitted due to size limit.*\n<!-- SENTINEL:SECTION:HANDBOOK:END -->\n'
+        /<!-- AI_REVIEW:SECTION:HANDBOOK -->[\s\S]*?<!-- AI_REVIEW:SECTION:HANDBOOK:END -->/m,
+        '<!-- AI_REVIEW:SECTION:HANDBOOK -->\n# Handbook\n\n*Omitted due to size limit.*\n<!-- AI_REVIEW:SECTION:HANDBOOK:END -->\n'
       )
       .replace(
-        /<!-- SENTINEL:SECTION:ADR -->[\s\S]*?<!-- SENTINEL:SECTION:ADR:END -->/m,
-        '<!-- SENTINEL:SECTION:ADR -->\n# ADR\n\n*Omitted due to size limit.*\n<!-- SENTINEL:SECTION:ADR:END -->\n'
+        /<!-- AI_REVIEW:SECTION:ADR -->[\s\S]*?<!-- AI_REVIEW:SECTION:ADR:END -->/m,
+        '<!-- AI_REVIEW:SECTION:ADR -->\n# ADR\n\n*Omitted due to size limit.*\n<!-- AI_REVIEW:SECTION:ADR:END -->\n'
       )
   }
 

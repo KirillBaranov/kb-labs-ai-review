@@ -1,7 +1,8 @@
 import * as path from 'node:path'
 import * as crypto from 'node:crypto'
 
-import type { ReviewJson, Severity } from '@kb-labs/ai-review-core'
+import type { ReviewJson } from '@kb-labs/shared-review-types'
+import type { Severity } from '@kb-labs/shared-review-types'
 import { maxSeverity, sevRank, findRepoRoot, printReviewSummary, printAnalyticsSummary } from '../cli-utils'
 
 import { pickProvider } from './providers'
@@ -82,7 +83,7 @@ export async function runReviewCLI(opts: {
   // ── Analytics: resolver + client
   const runId = crypto.randomUUID?.() ?? `run_${Date.now()}`
   const cfgResolved = resolveAnalyticsConfig({
-    rc: opts.rc,                       // .sentinelrc.json уже разобран в командe
+    rc: opts.rc,                       // .ai-reviewrc.json уже разобран в командe
     repoRoot: REPO_ROOT,
     overrides: {
       enabled: typeof opts.analytics === 'boolean' ? opts.analytics : undefined,
@@ -97,13 +98,13 @@ export async function runReviewCLI(opts: {
       branch: process.env.GIT_BRANCH || process.env.CI_COMMIT_BRANCH,
       provider: providerLabel,
       profile: opts.profile,
-      env: (process.env.SENTINEL_ENV as any) || 'dev',
+      env: (process.env.AI_REVIEW_ENV as any) || 'dev',
     },
     cfgResolved
   )
 
   await analytics.init()
-  analytics.start(runId, { model: process.env.SENTINEL_MODEL })
+  analytics.start(runId, { model: process.env.AI_REVIEW_MODEL })
 
   printAnalyticsSummary({ repoRoot: REPO_ROOT, runId, diag: analytics.diagnostics() })
 
@@ -121,7 +122,7 @@ export async function runReviewCLI(opts: {
   review.ai_review.run_id = runId
 
   // cap findings: cli flag > ENV
-  const envCap = process.env.SENTINEL_MAX_COMMENTS ? Number(process.env.SENTINEL_MAX_COMMENTS) : undefined
+  const envCap = process.env.AI_REVIEW_MAX_COMMENTS ? Number(process.env.AI_REVIEW_MAX_COMMENTS) : undefined
   const cap = Number.isFinite(opts.maxComments as number)
     ? (opts.maxComments as number)
     : Number.isFinite(envCap as number)

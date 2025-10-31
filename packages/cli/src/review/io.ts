@@ -33,11 +33,11 @@ export function writeArtifacts(outJsonPath: string, outMdPath: string, reviewJso
 
   // Transport Markdown с вложенным JSON
   const mdPayload =
-    `<!-- SENTINEL:DUAL:JSON -->\n` +
+    `<!-- AI_REVIEW:DUAL:JSON -->\n` +
     '```json\n' +
     json +
     '\n```\n' +
-    `<!-- SENTINEL:DUAL:JSON:END -->\n`
+    `<!-- AI_REVIEW:DUAL:JSON:END -->\n`
 
   fs.writeFileSync(outMdPath, mdPayload, 'utf8')
 }

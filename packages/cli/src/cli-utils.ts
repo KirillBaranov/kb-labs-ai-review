@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { bold, cyan, dim, green, red, yellow } from 'colorette'
-import type { Severity } from '@kb-labs/ai-review-core'
+import type { Severity } from '@kb-labs/shared-review-types'
 
 type AnalyticsRcLike = {
   analytics?: {
@@ -18,8 +18,12 @@ export function ensureDirForFile(p: string) {
   fs.mkdirSync(path.dirname(p), { recursive: true })
 }
 
-/** Resolve a (possibly relative) path against repo root */
-export function resolveRepoPath(repoRoot: string, p: string) {
+/** Resolve a (possibly relative) path against repo root
+ *  Uses @kb-labs/core-sys/fs::toAbsolute logic
+ */
+export function resolveRepoPath(repoRoot: string, p: string): string {
+  // Equivalent to @kb-labs/core-sys/fs::toAbsolute
+  if (!p) return repoRoot
   return path.isAbsolute(p) ? p : path.join(repoRoot, p)
 }
 
@@ -45,7 +49,7 @@ export function writeJsonSync(file: string, data: unknown) {
 /** Assert a file exists (throws a clear error) */
 export function assertFileExists(absPath: string, label = 'file') {
   if (!fs.existsSync(absPath)) {
-    throw new Error(`[sentinel] ${label} not found at ${absPath}`)
+    throw new Error(`[ai-review] ${label} not found at ${absPath}`)
   }
 }
 
@@ -57,22 +61,29 @@ export function prettyRelLink(repoRoot: string, absPath: string) {
 /** ────────────────────────────────────────────────────────────────────────────
  *  Repo root detection (stable for monorepos)
  *  ────────────────────────────────────────────────────────────────────────────
+ *  Uses @kb-labs/core-sys/repo logic with sync wrapper and env override support.
  *  Rules:
- *   - If SENTINEL_REPO_ROOT is set and exists → use it
- *   - Else walk up from `start` until you find .git or pnpm-workspace.yaml
+ *   - If AI_REVIEW_REPO_ROOT is set and exists → use it
+ *   - Else walk up from `start` until you find .git, pnpm-workspace.yaml, or package.json
  *   - If not found, fall back to `start` (no surprises)
  */
 export function findRepoRoot(start = process.cwd()): string {
-  const envRoot = process.env.SENTINEL_REPO_ROOT
+  // Env override (ai-review specific)
+  const envRoot = process.env.AI_REVIEW_REPO_ROOT
   if (envRoot && fs.existsSync(envRoot)) {
     return path.resolve(envRoot)
   }
 
+  // Sync version of @kb-labs/core-sys/repo logic
+  const markers = ['.git', 'pnpm-workspace.yaml', 'package.json']
   let dir = path.resolve(start)
+
   while (true) {
-    const isGitRoot  = fs.existsSync(path.join(dir, '.git'))
-    const isPnpmRoot = fs.existsSync(path.join(dir, 'pnpm-workspace.yaml'))
-    if (isGitRoot || isPnpmRoot) return dir
+    for (const marker of markers) {
+      if (fs.existsSync(path.join(dir, marker))) {
+        return dir
+      }
+    }
 
     const parent = path.dirname(dir)
     if (parent === dir) {
@@ -285,20 +296,20 @@ export function resolveAnalyticsOut(args: {
   // enabled: rc or env
   const enabled =
     !!rc?.analytics?.enabled ||
-    process.env.SENTINEL_ANALYTICS === '1' ||
-    process.env.SENTINEL_ANALYTICS === 'true'
+    process.env.AI_REVIEW_ANALYTICS === '1' ||
+    process.env.AI_REVIEW_ANALYTICS === 'true'
 
   // outDir: rc → env → default
   const outDirRaw =
     rc?.analytics?.outDir ||
-    process.env.SENTINEL_ANALYTICS_DIR ||
+    process.env.AI_REVIEW_ANALYTICS_DIR ||
     '.ai-review/analytics'
 
   const outDirAbs = resolveRepoPath(repoRoot, outDirRaw)
 
   // file mode: byDay | byRun (env switch; byDay по умолчанию)
   const mode =
-    (process.env.SENTINEL_ANALYTICS_FILE_MODE === 'byRun' ? 'byRun' : 'byDay') as
+    (process.env.AI_REVIEW_ANALYTICS_FILE_MODE === 'byRun' ? 'byRun' : 'byDay') as
       | 'byDay'
       | 'byRun'
 
