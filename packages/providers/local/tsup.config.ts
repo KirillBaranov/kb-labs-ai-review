@@ -5,6 +5,11 @@ export default {
   entry: {
     index: "src/index.ts",
   },
-  external: ["@kb-labs/ai-review-core", "@kb-labs/ai-review-provider-types"],
+  tsconfig: "../../../tsconfig.base.json",
+  external: [
+    "@kb-labs/ai-review-core",
+    "@kb-labs/ai-review-provider-types",
+    "@kb-labs/shared-review-types"
+  ],
   clean: false,
 };
