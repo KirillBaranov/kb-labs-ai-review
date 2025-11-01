@@ -29,8 +29,8 @@ describe('buildContext (with sandbox)', () => {
     sbx.cleanup()
   })
 
-  it('builds context markdown with sections (handbook, rules, boundaries)', () => {
-    const res = buildContext({
+  it('builds context markdown with sections (handbook, rules, boundaries)', async () => {
+    const res = await buildContext({
       profile: 'frontend',
       repoRoot: sbx.root,
       profilesDir: 'packages/profiles',
@@ -55,7 +55,7 @@ describe('buildContext (with sandbox)', () => {
     expect(md).toMatch(/- frontend\/docs\/handbook\/architecture\.md/)
   })
 
-  it('resolves custom profilesDir (absolute) and includes ADR when present', () => {
+  it('resolves custom profilesDir (absolute) and includes ADR when present', async () => {
     const customProfiles = path.join(sbx.root, 'custom-profiles')
     const profileRoot = path.join(customProfiles, 'frontend')
     fs.mkdirSync(path.join(profileRoot, 'docs', 'handbook'), { recursive: true })
@@ -69,7 +69,7 @@ describe('buildContext (with sandbox)', () => {
     fs.mkdirSync(path.join(profileRoot, 'docs', 'adr'), { recursive: true })
     fs.writeFileSync(path.join(profileRoot, 'docs', 'adr', '0001.md'), '# ADR 0001\nBody\n', 'utf8')
 
-    const res = buildContext({
+    const res = await buildContext({
       profile: 'frontend',
       repoRoot: sbx.root,
       profilesDir: customProfiles,
@@ -84,12 +84,12 @@ describe('buildContext (with sandbox)', () => {
     expect(md).toMatch(/- frontend\/docs\/adr\/0001\.md/)
   })
 
-  it('trims ADR section when maxApproxTokens is too small (soft guardrail)', () => {
+  it('trims ADR section when maxApproxTokens is too small (soft guardrail)', async () => {
     const adrDir = path.join(sbx.root, 'packages', 'profiles', 'frontend', 'docs', 'adr')
     fs.mkdirSync(adrDir, { recursive: true })
     fs.writeFileSync(path.join(adrDir, '0001.md'), '# ADR 0001\nSome text\nMore text\n', 'utf8')
 
-    const res = buildContext({
+    const res = await buildContext({
       profile: 'frontend',
       repoRoot: sbx.root,
       profilesDir: 'packages/profiles',
@@ -103,7 +103,7 @@ describe('buildContext (with sandbox)', () => {
     expect(md).toMatch(/\*Omitted due to context size constraints\.\*/)
   })
 
-  it('throws a clear error when rules.json is missing', () => {
+  it('throws a clear error when rules.json is missing', async () => {
     const rulesPath = path.join(
       sbx.root,
       'packages',
@@ -117,18 +117,18 @@ describe('buildContext (with sandbox)', () => {
 
     expect(fs.existsSync(rulesPath)).toBe(false)
 
-    expect(() =>
+    await expect(
       buildContext({
         profile: 'frontend',
         repoRoot: sbx.root,
         profilesDir: 'packages/profiles',
         outFile: outPathAt(sbx.root),
       })
-    ).toThrow(/rules\.json not found/)
+    ).rejects.toThrow(/rules\.json not found/)
   })
 
-  it('writes footer checksums and returns metadata (bytes, tokens, hashes)', () => {
-    const res = buildContext({
+  it('writes footer checksums and returns metadata (bytes, tokens, hashes)', async () => {
+    const res = await buildContext({
       profile: 'frontend',
       repoRoot: sbx.root,
       profilesDir: 'packages/profiles',

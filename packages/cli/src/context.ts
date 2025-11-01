@@ -6,7 +6,7 @@ import crypto from 'node:crypto'
 import {
   ensureDirForFile,
   printContextSummary,
-  findRepoRoot,
+  findRepoRootAsync,
 } from './cli-utils'
 
 /**
@@ -32,9 +32,6 @@ export interface BuildContextOptions {
 }
 
 type FileBlob = { path: string; content: string; bytes: number }
-
-// unified repo root
-const REPO_ROOT = findRepoRoot()
 
 /** Normalize newlines, strip BOM, trim trailing spaces per line */
 function normalizeText(s: string): string {
@@ -85,15 +82,15 @@ function readBlobs(files: string[]): FileBlob[] {
 }
 
 /** Relative path pretty-printer (works with custom profilesDir) */
-function rel(p: string, rootHint: string) {
+function rel(p: string, rootHint: string, repoRoot: string) {
   const try1 = path.relative(rootHint, p)
-  return try1 && !try1.startsWith('..') ? try1 : path.relative(REPO_ROOT, p)
+  return try1 && !try1.startsWith('..') ? try1 : path.relative(repoRoot, p)
 }
 
 /** Deterministic TOC for a set of markdown files */
-function buildTOC(blobs: FileBlob[], baseLabel: string, rootHint: string): string {
+function buildTOC(blobs: FileBlob[], baseLabel: string, rootHint: string, repoRoot: string): string {
   if (blobs.length === 0) return ''
-  const items = blobs.map(b => `- ${rel(b.path, rootHint)}`).join('\n')
+  const items = blobs.map(b => `- ${rel(b.path, rootHint, repoRoot)}`).join('\n')
   return [`### ${baseLabel} TOC`, '', items, ''].join('\n')
 }
 
@@ -119,10 +116,10 @@ function resolveProfilesDir(repoRoot: string, explicit?: string): string {
   )
 }
 
-export function buildContext(opts: BuildContextOptions) {
+export async function buildContext(opts: BuildContextOptions) {
+  const repoRoot = opts.repoRoot || await findRepoRootAsync()
   const {
     profile,
-    repoRoot = REPO_ROOT,
     profilesDir,
     outFile = path.join(repoRoot, 'dist', 'ai-review-context.md'),
     includeADR = true,
@@ -203,7 +200,7 @@ export function buildContext(opts: BuildContextOptions) {
   parts.push('<!-- AI_REVIEW:SECTION:HANDBOOK -->')
   parts.push('# Handbook')
   parts.push('')
-  parts.push(buildTOC(hbBlobs, 'Handbook', PROFILES_DIR))
+  parts.push(buildTOC(hbBlobs, 'Handbook', PROFILES_DIR, repoRoot))
   for (const blob of hbBlobs) {
     parts.push(`## ${path.basename(blob.path)}`)
     parts.push('')
@@ -239,7 +236,7 @@ export function buildContext(opts: BuildContextOptions) {
     parts.push('<!-- AI_REVIEW:SECTION:ADR -->')
     parts.push('# ADR')
     parts.push('')
-    parts.push(buildTOC(adrBlobs, 'ADR', PROFILES_DIR))
+    parts.push(buildTOC(adrBlobs, 'ADR', PROFILES_DIR, repoRoot))
     for (const blob of adrBlobs) {
       parts.push(`## ${path.basename(blob.path)}`)
       parts.push('')
@@ -313,9 +310,12 @@ export async function buildContextCLI(opts: {
   includeBoundaries?: boolean
   maxBytes?: number
   maxApproxTokens?: number
+  repoRoot?: string
 }) {
-  const res = buildContext({
+  const repoRoot = opts.repoRoot || await findRepoRootAsync()
+  const res = await buildContext({
     profile: opts.profile,
+    repoRoot,
     profilesDir: opts.profilesDir,
     outFile: opts.out,
     includeADR: opts.includeADR ?? true,
@@ -326,7 +326,7 @@ export async function buildContextCLI(opts: {
 
   // unified pretty summary
   printContextSummary({
-    repoRoot: REPO_ROOT,
+    repoRoot,
     profile: opts.profile,
     profilesRootLabel: opts.profilesDir ?? process.env.AI_REVIEW_PROFILES_DIR ?? '(auto)',
     outFile: res.outFile,

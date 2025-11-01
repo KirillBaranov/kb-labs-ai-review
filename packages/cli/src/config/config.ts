@@ -1,7 +1,9 @@
 // packages/cli/src/config.ts
-import fs from 'node:fs'
 import path from 'node:path'
-import { findRepoRoot } from '../cli-utils'
+import { loadBundle } from '@kb-labs/core-bundle'
+import { findRepoRootAsync } from '../cli-utils'
+import { adaptBundleConfigToResolvedConfig } from './bundle-adapter'
+import type { ReviewProductConfig } from './types'
 
 export type FailOn = 'none' | 'major' | 'critical'
 export type ProviderName = 'local' | 'mock' | 'openai' | 'claude'
@@ -97,233 +99,73 @@ export interface ResolvedConfig {
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 
-const REPO_ROOT = findRepoRoot()
-
-function readJsonSafe(p: string): any | null {
-  try { return JSON.parse(fs.readFileSync(p, 'utf8')) } catch { return null }
-}
-
-/** Ищем ближайший .ai-reviewrc.json от CWD вверх до корня репо */
-function findRc(startDir = process.cwd(), repoRoot = REPO_ROOT): string | null {
-  let dir = path.resolve(startDir)
-  while (true) {
-    const candidate = path.join(dir, '.ai-reviewrc.json')
-    if (fs.existsSync(candidate)) return candidate
-    const parent = path.dirname(dir)
-    if (parent === dir) break
-    if (dir === repoRoot) break
-    dir = parent
-  }
-  const fallback = path.join(repoRoot, '.ai-reviewrc.json')
-  return fs.existsSync(fallback) ? fallback : null
-}
-
-/** Глубокий merge только для 1 уровня вложенности (out/render/context/analytics) */
-function mergeRc(base: AiReviewRc, over?: AiReviewRc): AiReviewRc {
-  if (!over) return base
-  return {
-    ...base,
-    ...over,
-    out: { ...(base.out || {}), ...(over.out || {}) },
-    render: { ...(base.render || {}), ...(over.render || {}) },
-    context: { ...(base.context || {}), ...(over.context || {}) },
-    analytics: { ...(base.analytics || {}), ...(over.analytics || {}) },
-  }
-}
-
-/** ENV → RC (только новый стандарт ключей) */
-function envAsRc(): AiReviewRc {
-  const out: AiReviewRc = {}
-
-  if (process.env.AI_REVIEW_PROFILE) out.profile = process.env.AI_REVIEW_PROFILE
-  if (process.env.AI_REVIEW_PROFILES_DIR) out.profilesDir = process.env.AI_REVIEW_PROFILES_DIR as string
-  if (process.env.AI_REVIEW_PROVIDER) out.provider = process.env.AI_REVIEW_PROVIDER as ProviderName
-  if (process.env.AI_REVIEW_FAIL_ON) out.failOn = process.env.AI_REVIEW_FAIL_ON as FailOn
-  if (process.env.AI_REVIEW_MAX_COMMENTS) out.maxComments = Number(process.env.AI_REVIEW_MAX_COMMENTS)
-
-  // out.*
-  const outRoot   = process.env.AI_REVIEW_OUT_ROOT
-  const outCtx    = process.env.AI_REVIEW_OUT_CONTEXT_DIR
-  const outRev    = process.env.AI_REVIEW_OUT_REVIEWS_DIR
-  const outAn     = process.env.AI_REVIEW_OUT_ANALYTICS_DIR
-  const outExp    = process.env.AI_REVIEW_OUT_EXPORTS_DIR
-  const outMdName = process.env.AI_REVIEW_OUT_MD_NAME
-  const outJsonNm = process.env.AI_REVIEW_OUT_JSON_NAME
-  if (outRoot || outCtx || outRev || outAn || outExp || outMdName || outJsonNm) {
-    out.out = {
-      ...(out.out || {}),
-      ...(outRoot   ? { root: outRoot } : {}),
-      ...(outCtx    ? { contextDir: outCtx } : {}),
-      ...(outRev    ? { reviewsDir: outRev } : {}),
-      ...(outAn     ? { analyticsDir: outAn } : {}),
-      ...(outExp    ? { exportsDir: outExp } : {}),
-      ...(outMdName ? { mdName: outMdName } : {}),
-      ...(outJsonNm ? { jsonName: outJsonNm } : {}),
+/**
+ * Converts AiReviewRc CLI overrides to ReviewProductConfig format
+ * Note: profile is handled separately as profileKey
+ */
+function cliOverridesToReviewConfig(rc?: AiReviewRc): Partial<ReviewProductConfig> {
+  if (!rc) return {}
+  
+  const config: Partial<ReviewProductConfig> = {}
+  
+  if (rc.provider) config.provider = rc.provider
+  if (rc.failOn) config.failOn = rc.failOn
+  if (rc.maxComments !== undefined) config.maxComments = rc.maxComments
+  if (rc.out) config.out = rc.out
+  if (rc.render) config.render = rc.render
+  if (rc.context) config.context = rc.context
+  if (rc.analytics) {
+    config.analytics = {
+      ...rc.analytics,
+      // Convert analytics flag to enabled
+      enabled: rc.analytics.enabled !== undefined ? rc.analytics.enabled : undefined,
     }
   }
-
-  // context.*
-  const includeADR        = process.env.AI_REVIEW_CONTEXT_INCLUDE_ADR
-  const includeBoundaries = process.env.AI_REVIEW_CONTEXT_INCLUDE_BOUNDARIES
-  const maxBytes          = process.env.AI_REVIEW_CONTEXT_MAX_BYTES
-  const maxTokens         = process.env.AI_REVIEW_CONTEXT_MAX_TOKENS
-  if (includeADR || includeBoundaries || maxBytes || maxTokens) {
-    out.context = {
-      ...(out.context || {}),
-      ...(includeADR ? { includeADR: includeADR === '1' || includeADR === 'true' } : {}),
-      ...(includeBoundaries ? { includeBoundaries: includeBoundaries === '1' || includeBoundaries === 'true' } : {}),
-      ...(maxBytes ? { maxBytes: Number(maxBytes) } : {}),
-      ...(maxTokens ? { maxApproxTokens: Number(maxTokens) } : {}),
-    }
-  }
-
-  // analytics.*
-  const anEnabled = process.env.AI_REVIEW_ANALYTICS
-  const anMode    = process.env.AI_REVIEW_ANALYTICS_MODE || process.env.AI_REVIEW_ANALYTICS_FILE_MODE
-  const anDir     = process.env.AI_REVIEW_ANALYTICS_DIR
-  const anSalt    = process.env.AI_REVIEW_ANALYTICS_SALT || process.env.AI_REVIEW_SALT
-  const anPriv    = process.env.AI_REVIEW_ANALYTICS_PRIVACY
-  if (anEnabled || anMode || anDir || anSalt || anPriv) {
-    out.analytics = {
-      ...(out.analytics || {}),
-      ...(anEnabled ? { enabled: anEnabled === '1' || anEnabled === 'true' } : {}),
-      ...(anMode ? { mode: (anMode as 'byRun' | 'byDay') } : {}),
-      ...(anDir ? { outDir: anDir } : {}),
-      ...(anSalt ? { salt: anSalt } : {}),
-      ...(anPriv ? { privacy: (anPriv as 'team' | 'detailed') } : {}),
-    }
-  }
-
-  return out
-}
-
-/** Значения по умолчанию — “хорошо и удобно” */
-const defaults: Required<Pick<AiReviewRc,
-  'profile' | 'provider' | 'out' | 'context' | 'analytics'
->> = {
-  profile: 'frontend',
-  provider: 'local',
-  out: {
-    root: '.ai-review',
-    contextDir: 'context',
-    reviewsDir: 'reviews',
-    analyticsDir: 'analytics',
-    exportsDir: 'exports',
-    mdName: 'review.md',
-    jsonName: 'review.json',
-  },
-  context: {
-    includeADR: true,
-    includeBoundaries: true,
-    maxBytes: 1_500_000,
-    maxApproxTokens: 0,
-  },
-  analytics: {
-    enabled: false,
-    mode: 'byDay',
-    outDir: '',      // будет вычислено из out.root/analyticsDir
-    salt: 'sentinel',
-    privacy: 'team',
-    plugins: [],
-    pluginConfig: {},
-  },
+  
+  return config
 }
 
 /**
- * Публичный загрузчик: defaults <- rc(file) <- env <- cli
+ * Public config loader using loadBundle
  * 
- * TODO: Future migration to @kb-labs/core-bundle::loadBundle
- * Once review.schema.json is extended with all AiReviewRc fields,
- * we'll migrate to loadBundle for unified configuration system.
- * See config-loader.ts for migration adapter skeleton.
+ * Full migration to @kb-labs/core-bundle::loadBundle
+ * Configuration is loaded from:
+ * - Profile defaults (products.review.config)
+ * - Workspace config (products.aiReview)
+ * - CLI overrides (via cli parameter)
  */
-export function loadConfig(cliOverrides?: AiReviewRc): ResolvedConfig {
-  const rcPath = findRc()
-  const fileRc = rcPath ? (readJsonSafe(rcPath) as AiReviewRc || {}) : {}
-
-  const merged = mergeRc(
-    mergeRc(
-      mergeRc(defaults, fileRc),
-      envAsRc(),
-    ),
-    cliOverrides,
-  )
-
-  const repoRoot = REPO_ROOT
-
-  // normalize & absolutize
-  const out = merged.out || {}
-  const outRootAbs = path.isAbsolute(out.root || '')
-    ? (out.root as string)
-        : path.join(repoRoot, out.root || '.ai-review')
-
-  const contextDirAbs   = path.join(outRootAbs, out.contextDir   ?? 'context')
-  const reviewsDirAbs   = path.join(outRootAbs, out.reviewsDir   ?? 'reviews')
-  const analyticsDirAbs = path.join(outRootAbs, out.analyticsDir ?? 'analytics')
-  const exportsDirAbs   = path.join(outRootAbs, out.exportsDir   ?? 'exports')
-
-  const mdName   = out.mdName   ?? 'review.md'
-  const jsonName = out.jsonName ?? 'review.json'
-
-  const analytics = merged.analytics || {}
-  const analyticsOutDirAbs = (() => {
-    if (analytics.outDir && path.isAbsolute(analytics.outDir)) return analytics.outDir
-    if (analytics.outDir) return path.join(repoRoot, analytics.outDir)
-    // если не задано — берём стандарт из out.*
-    return analyticsDirAbs
-  })()
-
-  const profilesDirAbs = (() => {
-    const p = merged.profilesDir || 'packages/profiles'
-    return path.isAbsolute(p) ? p : path.join(repoRoot, p)
-  })()
-
-  const render = merged.render || {}
-  const renderTemplateAbs =
-    render.template
-      ? (path.isAbsolute(render.template) ? render.template : path.join(repoRoot, render.template))
-      : undefined
-
-  return {
-    repoRoot,
-    profile: merged.profile || 'frontend',
-    provider: merged.provider || 'local',
-    profilesDir: profilesDirAbs,
-    failOn: merged.failOn || 'major',
-    maxComments: merged.maxComments,
-
-    out: {
-      rootAbs: outRootAbs,
-      contextDirAbs,
-      reviewsDirAbs,
-      analyticsDirAbs,
-      exportsDirAbs,
-      mdName,
-      jsonName,
-    },
-
-    render: {
-      template: renderTemplateAbs,
-      severityMap: render.severityMap,
-    },
-
-    context: {
-      includeADR: merged.context?.includeADR ?? true,
-      includeBoundaries: merged.context?.includeBoundaries ?? true,
-      maxBytes: merged.context?.maxBytes ?? 1_500_000,
-      maxApproxTokens: merged.context?.maxApproxTokens ?? 0,
-    },
-
-    analytics: {
-      enabled: !!analytics.enabled,
-      mode: analytics.mode ?? 'byDay',
-      outDir: analyticsOutDirAbs,
-      salt: analytics.salt ?? 'ai-review',
-      privacy: analytics.privacy ?? 'team',
-      plugins: analytics.plugins,
-      pluginConfig: analytics.pluginConfig,
-    },
+export async function loadConfig(
+  cliOverrides?: AiReviewRc,
+  options?: {
+    cwd?: string
+    profileKey?: string
   }
+): Promise<ResolvedConfig> {
+  const cwd = options?.cwd || process.cwd()
+  
+  // Extract profile key from CLI overrides or options
+  // Default to 'frontend' if not specified
+  const profileKey = options?.profileKey || cliOverrides?.profile || 'frontend'
+  
+  // Convert CLI overrides to ReviewProductConfig format
+  const cliConfig = cliOverridesToReviewConfig(cliOverrides)
+  
+  // loadBundle handles:
+  // - Reading workspace config (kb-labs.config.yaml)
+  // - Resolving profile via workspace.profiles[profileKey]
+  // - Loading profile via loadProfile (inheritance, artifacts)
+  // - Extracting products.review.config from profile
+  // - Merging layers: defaults → profile → preset → workspace → CLI
+  const bundle = await loadBundle<ReviewProductConfig>({
+    cwd,
+    product: 'aiReview',
+    profileKey, // key from workspace.profiles
+    cli: cliConfig, // CLI overrides applied as last layer
+    validate: 'warn',
+  })
+  
+  const repoRoot = await findRepoRootAsync(cwd)
+  
+  return adaptBundleConfigToResolvedConfig(bundle, repoRoot)
 }
 
-export const _internal = { REPO_ROOT, findRc }

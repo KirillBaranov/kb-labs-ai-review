@@ -35,7 +35,7 @@ describe('config.loadConfig (with sandbox)', () => {
 
   it('returns defaults when no rc and no env', async () => {
     const { loadConfig } = await loadConfigFresh()
-    const cfg = loadConfig()
+    const cfg = await loadConfig()
     expect(cfg.profile).toBe('frontend')
     expect(cfg.provider).toBe('local')
     expect(cfg.out.rootAbs).toContain('.ai-review')
@@ -52,7 +52,7 @@ describe('config.loadConfig (with sandbox)', () => {
     })
 
     const { loadConfig } = await loadConfigFresh()
-    const cfg = loadConfig()
+    const cfg = await loadConfig()
     expect(cfg.profile).toBe('backend')
     expect(cfg.provider).toBe('mock')
     expect(cfg.out.rootAbs).toBe(path.join(sbx.root, 'build'))
@@ -69,7 +69,7 @@ describe('config.loadConfig (with sandbox)', () => {
 
     {
       const { loadConfig } = await loadConfigFresh()
-      const cfg = loadConfig()
+      const cfg = await loadConfig()
       expect(cfg.profile).toBe('root-rc')
     }
 
@@ -80,7 +80,7 @@ describe('config.loadConfig (with sandbox)', () => {
       fs.writeFileSync(outsidePath, JSON.stringify({ profile: 'outside' }), 'utf8')
 
       const { loadConfig } = await loadConfigFresh()
-      const cfg = loadConfig()
+      const cfg = await loadConfig()
       expect(cfg.profile).toBe('root-rc')
     } finally {
       try { fs.rmSync(outsidePath, { force: true }) } catch {}
@@ -102,7 +102,7 @@ describe('config.loadConfig (with sandbox)', () => {
     process.env.AI_REVIEW_CONTEXT_MAX_TOKENS = '999'
 
     const { loadConfig } = await loadConfigFresh()
-    const cfg = loadConfig()
+    const cfg = await loadConfig()
 
     expect(cfg.profile).toBe('env-prof')
     expect(cfg.provider).toBe('openai')
@@ -124,7 +124,7 @@ describe('config.loadConfig (with sandbox)', () => {
     process.env.AI_REVIEW_OUT_ROOT = 'env-out'
 
     const { loadConfig } = await loadConfigFresh()
-    const cfg = loadConfig({
+    const cfg = await loadConfig({
       profile: 'cli-prof',
       provider: 'claude',
       out: { root: 'cli-out', mdName: 'cli.md', jsonName: 'cli.json' },
@@ -148,7 +148,7 @@ describe('config.loadConfig (with sandbox)', () => {
   it('does not change absolute profilesDir', async () => {
     const absProfiles = path.join(sbx.root, 'custom-profiles')
     const { loadConfig } = await loadConfigFresh()
-    const cfg = loadConfig({ profilesDir: absProfiles })
+    const cfg = await loadConfig({ profilesDir: absProfiles })
     expect(cfg.profilesDir).toBe(absProfiles)
   })
 })

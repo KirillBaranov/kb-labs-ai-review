@@ -3,7 +3,7 @@ import * as crypto from 'node:crypto'
 
 import type { ReviewJson } from '@kb-labs/shared-review-types'
 import type { Severity } from '@kb-labs/shared-review-types'
-import { maxSeverity, sevRank, findRepoRoot, printReviewSummary } from '../cli-utils'
+import { maxSeverity, sevRank, findRepoRootAsync, printReviewSummary } from '../cli-utils'
 
 import { pickProvider } from './providers'
 import { loadRules, loadBoundaries } from './profiles'
@@ -11,9 +11,6 @@ import { readDiff, prepareOutputs, writeArtifacts } from './io'
 
 import { runScope, type AnalyticsEventV1, type EmitResult } from '@kb-labs/analytics-sdk-node'
 import { ANALYTICS_EVENTS, ANALYTICS_ACTOR } from '../analytics/events'
-
-// ────────────────────────────────────────────────────────────────────────────────
-const REPO_ROOT = findRepoRoot()
 
 function capFindings<T extends { severity: Severity }>(list: T[], cap?: number): T[] {
   return cap && cap > 0 && list.length > cap ? list.slice(0, cap) : list
@@ -53,19 +50,21 @@ export async function runReviewCLI(opts: {
   maxComments?: number
   debug?: boolean
   rc?: any               // пробрасываем целиком rc из команды
+  repoRoot?: string      // optional repo root (auto-detected if not provided)
 }) {
+  const repoRoot = opts.repoRoot || await findRepoRootAsync()
   const provider = pickProvider(opts.provider)
   const providerLabel = provider.name || 'local'
 
-  const { outMdPath, outJsonPath } = prepareOutputs(REPO_ROOT, opts.outMd, opts.outJson)
-  const { diffPath, diffText } = readDiff(REPO_ROOT, opts.diff)
+  const { outMdPath, outJsonPath } = prepareOutputs(repoRoot, opts.outMd, opts.outJson)
+  const { diffPath, diffText } = readDiff(repoRoot, opts.diff)
 
-  const rulesRaw = loadRules(REPO_ROOT, opts.profile, opts.profilesDir)
-  const boundaries = loadBoundaries(REPO_ROOT, opts.profile, opts.profilesDir)
+  const rulesRaw = await loadRules(repoRoot, opts.profile, opts.profilesDir)
+  const boundaries = await loadBoundaries(repoRoot, opts.profile, opts.profilesDir)
 
   if (opts.debug) {
     console.log('[review:debug]', {
-      REPO_ROOT,
+      repoRoot,
       provider: providerLabel,
       diffPath,
       outMdPath,
@@ -85,7 +84,7 @@ export async function runReviewCLI(opts: {
       runId,
       actor: ANALYTICS_ACTOR,
       ctx: {
-        workspace: REPO_ROOT,
+        workspace: repoRoot,
         provider: providerLabel,
         profile: opts.profile,
       },
@@ -142,7 +141,7 @@ export async function runReviewCLI(opts: {
         const exit = computeExit(top, opts.failOn)
 
         printReviewSummary({
-          repoRoot: REPO_ROOT,
+          repoRoot,
           providerLabel,
           profile: opts.profile,
           outJsonPath,

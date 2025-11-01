@@ -3,6 +3,8 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { bold, cyan, dim, green, red, yellow } from 'colorette'
 import type { Severity } from '@kb-labs/shared-review-types'
+import { findRepoRoot as findRepoRootCore, toAbsolute } from '@kb-labs/core'
+import { box, keyValue, safeColors, safeSymbols } from '@kb-labs/shared-cli-ui'
 
 type AnalyticsRcLike = {
   analytics?: {
@@ -14,17 +16,19 @@ type AnalyticsRcLike = {
 /** ────────────────────────────────────────────────────────────────────────────
  *  FS helpers
  *  ──────────────────────────────────────────────────────────────────────────── */
+/**
+ * Ensure parent directory exists for a file path (sync, local utility).
+ * For directory creation, consider @kb-labs/cli-adapters/io/fs-artifacts.ensureDir (async).
+ */
 export function ensureDirForFile(p: string) {
   fs.mkdirSync(path.dirname(p), { recursive: true })
 }
 
 /** Resolve a (possibly relative) path against repo root
- *  Uses @kb-labs/core-sys/fs::toAbsolute logic
+ *  Uses @kb-labs/core-sys/fs::toAbsolute
  */
 export function resolveRepoPath(repoRoot: string, p: string): string {
-  // Equivalent to @kb-labs/core-sys/fs::toAbsolute
-  if (!p) return repoRoot
-  return path.isAbsolute(p) ? p : path.join(repoRoot, p)
+  return toAbsolute(repoRoot, p)
 }
 
 /** Make file:// link for pretty output */
@@ -61,11 +65,11 @@ export function prettyRelLink(repoRoot: string, absPath: string) {
 /** ────────────────────────────────────────────────────────────────────────────
  *  Repo root detection (stable for monorepos)
  *  ────────────────────────────────────────────────────────────────────────────
- *  Uses @kb-labs/core-sys/repo logic with sync wrapper and env override support.
+ *  Async version using @kb-labs/core-sys/repo with env override support.
  *  Rules:
  *   - If AI_REVIEW_REPO_ROOT is set and exists → use it
- *   - Else walk up from `start` until you find .git, pnpm-workspace.yaml, or package.json
- *   - If not found, fall back to `start` (no surprises)
+ *   - Else use @kb-labs/core-sys/repo.findRepoRoot()
+ *  @deprecated Use findRepoRootAsync instead. This sync wrapper will be removed.
  */
 export function findRepoRoot(start = process.cwd()): string {
   // Env override (ai-review specific)
@@ -74,7 +78,7 @@ export function findRepoRoot(start = process.cwd()): string {
     return path.resolve(envRoot)
   }
 
-  // Sync version of @kb-labs/core-sys/repo logic
+  // Sync fallback for backward compatibility
   const markers = ['.git', 'pnpm-workspace.yaml', 'package.json']
   let dir = path.resolve(start)
 
@@ -92,6 +96,25 @@ export function findRepoRoot(start = process.cwd()): string {
     }
     dir = parent
   }
+}
+
+/** ────────────────────────────────────────────────────────────────────────────
+ *  Async repo root detection using @kb-labs/core-sys/repo
+ *  ────────────────────────────────────────────────────────────────────────────
+ *  Uses @kb-labs/core-sys/repo.findRepoRoot() with env override support.
+ *  Rules:
+ *   - If AI_REVIEW_REPO_ROOT is set and exists → use it
+ *   - Else use @kb-labs/core-sys/repo.findRepoRoot()
+ */
+export async function findRepoRootAsync(start = process.cwd()): Promise<string> {
+  // Env override (ai-review specific)
+  const envRoot = process.env.AI_REVIEW_REPO_ROOT
+  if (envRoot && fs.existsSync(envRoot)) {
+    return path.resolve(envRoot)
+  }
+
+  // Use platform implementation
+  return await findRepoRootCore(start)
 }
 
 /** ────────────────────────────────────────────────────────────────────────────
@@ -140,35 +163,32 @@ export function printReviewSummary(args: {
   const counts = countBySeverity(findings ?? [])
   const top = maxSeverity(findings ?? [])
 
-  console.log('')
-  console.log(bold('Review summary'))
-  console.log('  ' + cyan('provider: ') + providerLabel)
-  console.log('  ' + cyan('profile:  ') + profile)
-  console.log('  ' + cyan('outputs:  ')
-    + `${dim(path.relative(repoRoot, outJsonPath))}, `
-    + `${dim(path.relative(repoRoot, outMdPath))}`)
-  console.log('  ' + cyan('findings: ')
-    + `${total} `
-    + dim(`(critical ${counts.critical}, major ${counts.major}, minor ${counts.minor}, info ${counts.info})`))
-  console.log('  ' + cyan('max severity: ')
-    + (top
-      ? (top === 'critical' ? red('critical') : top === 'major' ? yellow('major') : green(top))
-      : green('none')))
+  const summaryInfo: Record<string, string> = {
+    provider: providerLabel,
+    profile,
+    outputs: `${safeColors.dim(path.relative(repoRoot, outJsonPath))}, ${safeColors.dim(path.relative(repoRoot, outMdPath))}`,
+    findings: `${total} ${safeColors.dim(`(critical ${counts.critical}, major ${counts.major}, minor ${counts.minor}, info ${counts.info})`)}`,
+    'max severity': top
+      ? (top === 'critical' ? safeColors.error('critical') : top === 'major' ? safeColors.warning('major') : safeColors.success(top))
+      : safeColors.success('none'),
+  }
 
-  // Exit policy line
-  let line = ''
+  // Exit policy
+  let exitPolicy = ''
   if (exit.mode === 'none') {
-    line = green('exit 0') + dim(' — failOn=none (never fail)')
+    exitPolicy = `${safeColors.success('exit 0')} ${safeColors.dim('— failOn=none (never fail)')}`
   } else if (exit.mode === 'threshold') {
     const shouldFail = exit.exitCode !== 0
-    line = (shouldFail ? red('exit 1') : green('exit 0'))
-         + dim(` — failOn=${exit.threshold}, max=${exit.top ?? 'none'}`)
+    exitPolicy = `${shouldFail ? safeColors.error('exit 1') : safeColors.success('exit 0')} ${safeColors.dim(`— failOn=${exit.threshold}, max=${exit.top ?? 'none'}`)}`
   } else {
-    // legacy
-    line = (exit.exitCode ? yellow(`exit ${exit.exitCode}`) : green('exit 0'))
-         + dim(' — legacy policy (critical→20, major→10, else 0)')
+    exitPolicy = `${exit.exitCode ? safeColors.warning(`exit ${exit.exitCode}`) : safeColors.success('exit 0')} ${safeColors.dim('— legacy policy (critical→20, major→10, else 0)')}`
   }
-  console.log('  ' + cyan('exit policy: ') + line)
+  summaryInfo['exit policy'] = exitPolicy
+
+  const lines: string[] = []
+  lines.push(...keyValue(summaryInfo))
+  const output = box('Review Summary', lines)
+  console.log(output)
 }
 
 /** Print nice summary for context build */
@@ -185,14 +205,20 @@ export function printContextSummary(args: {
   checksum: string
 }) {
   const { repoRoot, profile, profilesRootLabel, outFile, handbookCount, adrCount, hasBoundaries, bytes, tokens, checksum } = args
-  console.log('')
-  console.log(bold('Context summary'))
-  console.log('  ' + cyan('profile:  ') + profile)
-  console.log('  ' + cyan('profiles: ') + profilesRootLabel)
-  console.log('  ' + cyan('output:   ') + `${path.relative(repoRoot, outFile)} → ${linkifyFile(outFile)}`)
-  console.log('  ' + cyan('sections: ') + `handbook ${handbookCount}, adr ${adrCount}, boundaries ${hasBoundaries ? 'yes' : 'no'}`)
-  console.log('  ' + cyan('size:     ') + `${bytes} bytes, ~${tokens} tokens`)
-  console.log('  ' + cyan('checksum: ') + checksum)
+
+  const summaryInfo: Record<string, string> = {
+    profile,
+    profiles: profilesRootLabel,
+    output: `${safeColors.dim(path.relative(repoRoot, outFile))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(outFile))}`,
+    sections: `handbook ${handbookCount}, adr ${adrCount}, boundaries ${hasBoundaries ? 'yes' : 'no'}`,
+    size: `${bytes} bytes, ~${tokens} tokens`,
+    checksum,
+  }
+
+  const lines: string[] = []
+  lines.push(...keyValue(summaryInfo))
+  const output = box('Context Summary', lines)
+  console.log(output)
 }
 
 /** Print nice summary for render → Markdown */
@@ -203,14 +229,22 @@ export function printRenderSummaryMarkdown(args: {
   findingsCount?: number
 }) {
   const { repoRoot, inFile, outFile, findingsCount } = args
-  console.log('')
-  console.log(bold('Render (Markdown) summary'))
-  console.log('  ' + cyan('input:   ') + `${dim(path.relative(repoRoot, inFile))} ${cyan('→')} ${dim(linkifyFile(inFile))}`)
-  console.log('  ' + cyan('output:  ') + `${dim(path.relative(repoRoot, outFile))} ${cyan('→')} ${dim(linkifyFile(outFile))}`)
-  if (typeof findingsCount === 'number') {
-    console.log('  ' + cyan('findings: ') + findingsCount)
+
+  const summaryInfo: Record<string, string> = {
+    input: `${safeColors.dim(path.relative(repoRoot, inFile))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(inFile))}`,
+    output: `${safeColors.dim(path.relative(repoRoot, outFile))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(outFile))}`,
   }
-  ok('Markdown written')
+
+  if (typeof findingsCount === 'number') {
+    summaryInfo.findings = String(findingsCount)
+  }
+
+  const lines: string[] = []
+  lines.push(...keyValue(summaryInfo))
+  lines.push('')
+  lines.push(`${safeSymbols.success} ${safeColors.success('Markdown written')}`)
+  const output = box('Render (Markdown) Summary', lines)
+  console.log(output)
 }
 
 /** Print nice summary for render → HTML */
@@ -220,11 +254,18 @@ export function printRenderSummaryHtml(args: {
   outFile: string
 }) {
   const { repoRoot, inFile, outFile } = args
-  console.log('')
-  console.log(bold('Render (HTML) summary'))
-  console.log('  ' + cyan('input:   ') + `${dim(path.relative(repoRoot, inFile))} ${cyan('→')} ${dim(linkifyFile(inFile))}`)
-  console.log('  ' + cyan('output:  ') + `${dim(path.relative(repoRoot, outFile))} ${cyan('→')} ${dim(linkifyFile(outFile))}`)
-  ok('HTML written')
+
+  const summaryInfo: Record<string, string> = {
+    input: `${safeColors.dim(path.relative(repoRoot, inFile))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(inFile))}`,
+    output: `${safeColors.dim(path.relative(repoRoot, outFile))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(outFile))}`,
+  }
+
+  const lines: string[] = []
+  lines.push(...keyValue(summaryInfo))
+  lines.push('')
+  lines.push(`${safeSymbols.success} ${safeColors.success('HTML written')}`)
+  const output = box('Render (HTML) Summary', lines)
+  console.log(output)
 }
 
 /** Print concise summary for init-profile */
@@ -336,38 +377,38 @@ export function printAnalyticsSummary(args: {
   }
 }) {
   const { repoRoot, runId, diag } = args
-  console.log('')
-  console.log(bold('Analytics summary'))
 
   if (!diag.enabled) {
-    console.log('  ' + cyan('status:   ') + dim('disabled (rc/env)'))
+    const summaryInfo: Record<string, string> = {
+      status: safeColors.dim('disabled (rc/env)'),
+    }
+    const lines: string[] = []
+    lines.push(...keyValue(summaryInfo))
+    const output = box('Analytics Summary', lines)
+    console.log(output)
     return
   }
 
-  console.log('  ' + cyan('status:   ') + green('enabled'))
-  console.log('  ' + cyan('mode:     ') + diag.mode)
-  console.log('  ' + cyan('privacy:  ') + diag.privacy)
+  const summaryInfo: Record<string, string> = {
+    status: safeColors.success('enabled'),
+    mode: diag.mode,
+    privacy: diag.privacy,
+  }
+
   if (runId) {
-    console.log('  ' + cyan('run_id:   ') + dim(runId))
+    summaryInfo['run_id'] = safeColors.dim(runId)
   }
 
   if (diag.outDir) {
-    console.log(
-      '  ' +
-        cyan('directory:') +
-        ` ${dim(path.relative(repoRoot, diag.outDir))} ${cyan('→')} ${dim(
-          linkifyFile(diag.outDir)
-        )}`
-    )
+    summaryInfo.directory = `${safeColors.dim(path.relative(repoRoot, diag.outDir))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(diag.outDir))}`
   }
 
   if (diag.currentFile) {
-    console.log(
-      '  ' +
-        cyan('file:     ') +
-        ` ${dim(path.relative(repoRoot, diag.currentFile))} ${cyan('→')} ${dim(
-          linkifyFile(diag.currentFile)
-        )}`
-    )
+    summaryInfo.file = `${safeColors.dim(path.relative(repoRoot, diag.currentFile))} ${safeColors.success('→')} ${safeColors.dim(linkifyFile(diag.currentFile))}`
   }
+
+  const lines: string[] = []
+  lines.push(...keyValue(summaryInfo))
+  const output = box('Analytics Summary', lines)
+  console.log(output)
 }

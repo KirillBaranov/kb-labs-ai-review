@@ -11,7 +11,6 @@ export default {
     "@kb-labs/ai-review-provider-types",
     "@kb-labs/ai-review-provider-mock",
     "@kb-labs/ai-review-provider-local",
-    "@kb-labs/ai-review-analytics",
     "@kb-labs/shared-diff",
     "@kb-labs/core-sys",
     "commander",
