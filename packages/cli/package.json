@@ -1,6 +1,7 @@
 {
   "name": "@kb-labs/ai-review-cli",
   "version": "0.1.0",
+  "description": "KB Labs AI Review - CLI commands for running AI-powered code reviews",
   "type": "module",
   "bin": {
     "ai-review": "./dist/index.js"
@@ -22,12 +23,25 @@
     "LICENSE"
   ],
   "sideEffects": false,
+  "author": {
+    "name": "Kirill Baranov",
+    "url": "https://github.com/kirill-baranov"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kirill-baranov/kb-labs-ai-review.git",
+    "directory": "packages/cli"
+  },
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsup --config tsup.config.ts",
     "dev": "tsup --config tsup.config.ts --watch",
     "type-check": "tsc --noEmit",
-    "test": "vitest"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run -c ../../vitest.config.ts",
+    "test:watch": "vitest -c ../../vitest.config.ts"
   },
   "dependencies": {
     "@kb-labs/analytics-sdk-node": "link:../../../kb-labs-analytics/packages/analytics-sdk-node",
@@ -35,18 +49,22 @@
     "@kb-labs/ai-review-provider-types": "workspace:*",
     "@kb-labs/ai-review-provider-mock": "workspace:*",
     "@kb-labs/ai-review-provider-local": "workspace:*",
-    "@kb-labs/ai-review-analytics": "link:../analytics",
-    "@kb-labs/core-sys": "link:../../../kb-labs-core/packages/sys",
+    "@kb-labs/core": "link:../../../kb-labs-core",
+    "@kb-labs/core-bundle": "link:../../../kb-labs-core/packages/bundle",
     "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/review-types",
     "@kb-labs/cli-core": "link:../../../kb-labs-cli/packages/core",
     "@kb-labs/cli-commands": "link:../../../kb-labs-cli/packages/commands",
+    "@kb-labs/shared-cli-ui": "link:../../../kb-labs-shared/packages/cli-ui",
+    "@kb-labs/shared-profiles": "link:../../../kb-labs-shared/packages/profiles",
     "commander": "^12.1.0",
     "colorette": "^2.0.20"
   },
   "devDependencies": {
-    "rimraf": "^6.0.1",
-    "tsup": "^8.5.0",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@types/node": "^24.7.0",
+    "rimraf": "^6",
+    "tsup": "^8",
+    "typescript": "^5",
+    "vitest": "^3"
   }
 }
