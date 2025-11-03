@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "domain": "with-adr",
+  "metadata": {
+    "owner": "profiles/with-adr",
+    "createdAt": "2025-10-31"
+  },
+  "rules": [
+    {
+      "id": "arch.modular-boundaries",
+      "area": "Architecture",
+      "severity": "critical",
+      "description": "Enforce module boundaries; no cross-feature imports without adapter.",
+      "link": "docs/handbook/architecture.md#module-boundaries",
+      "examples": {
+        "bad": [
+          "feature-a imports feature-b/internal"
+        ],
+        "good": [
+          "feature-a -> shared/ports adapter -> feature-b"
+        ]
+      },
+      "scope": [
+        "changed",
+        "project"
+      ],
+      "trigger": {
+        "type": "hybrid",
+        "signals": [
+          "import-graph",
+          "path-alias"
+        ]
+      },
+      "status": "active",
+      "version": 1,
+      "ask_feedback": true
+    },
+    {
+      "id": "style.no-todo-comment",
+      "area": "DX",
+      "severity": "minor",
+      "description": "Avoid TODO comments in code; track via issue links instead.",
+      "link": "docs/handbook/style.md#no-todo",
+      "examples": {
+        "bad": [
+          "// TODO: remove later"
+        ],
+        "good": [
+          "// see ISSUE-123 for follow-up"
+        ]
+      },
+      "scope": [
+        "changed"
+      ],
+      "trigger": {
+        "type": "pattern",
+        "signals": [
+          "added-line:TODO"
+        ]
+      },
+      "status": "active",
+      "version": 1
+    }
+  ]
+}

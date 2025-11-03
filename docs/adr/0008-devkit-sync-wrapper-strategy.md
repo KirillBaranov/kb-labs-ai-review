@@ -66,3 +66,4 @@ Future steps:
 - [Product Template Repository](https://github.com/KirillBaranov/kb-labs-product-template)
 - [Related ADR: ADR-0005: Use DevKit for Shared Tooling](./0005-use-devkit-for-shared-tooling.md)
 
+

@@ -47,3 +47,4 @@ This approach provides:
 - **Keep configs within each project** — Rejected due to high maintenance cost
 - **Use external shared configs** (e.g., `eslint-config-standard`) without custom devkit — Rejected as more custom rules and integrations (tsup, GitHub Actions) are required
 
+

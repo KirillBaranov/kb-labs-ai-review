@@ -91,9 +91,18 @@ pnpm test:coverage
 
 We use Vitest and @testing-library conventions.
 
-## 📄 License
+## 🏗️ Architecture Decisions
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+- For significant architectural changes, add an ADR in `docs/adr/`
+- Follow the ADR template in `docs/adr/0000-template.md`
+- Include required metadata (Date, Status, Deciders, **Last Reviewed**, **Tags**)
+- **Last Reviewed** date is required and should be updated periodically
+- **Tags** are mandatory (minimum 1, maximum 5 tags from approved list)
+- See [Documentation Standard](./docs/DOCUMENTATION.md) for ADR format requirements
+
+---
+
+**See [Documentation Standard](./docs/DOCUMENTATION.md) for complete documentation guidelines.**
 
 
 
