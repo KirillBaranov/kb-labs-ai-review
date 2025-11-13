@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@kb-labs/ai-review-core": ["../ai-review-core/src/index.ts"],
+      "@kb-labs/ai-review-core/*": ["../ai-review-core/src/*"]
+    }
+  },
+  "include": ["src", "tests"]
+}
