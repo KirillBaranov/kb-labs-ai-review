@@ -1,0 +1,27 @@
+import crypto from 'node:crypto';
+import type { Severity, ReviewFinding } from '@kb-labs/shared-review-types';
+
+export function groupBySeverity(findings: ReviewFinding[]) {
+  const order: Severity[] = ['critical', 'major', 'minor', 'info'];
+  const map = new Map<Severity, ReviewFinding[]>();
+  for (const s of order) {
+    map.set(s, []);
+  }
+  for (const f of findings) {
+    map.get(f.severity)!.push(f);
+  }
+  return { order, map };
+}
+
+export function sha1(content: string): string {
+  return crypto.createHash('sha1').update(content).digest('hex');
+}
+
+export function makeFingerprint(
+  rule: string,
+  file: string,
+  locator: string,
+  firstFinding: string
+): string {
+  return sha1(`${rule}\n${file}\n${locator}\n${firstFinding}`);
+}
