@@ -1,0 +1,60 @@
+{
+  "name": "@kb-labs/ai-review-plugin",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "description": "Runtime surfaces (CLI/workflow) for the KB Labs AI Review plugin.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./manifest": {
+      "import": "./dist/manifest.v2.js",
+      "types": "./dist/manifest.v2.d.ts"
+    },
+    "./dist/*": "./dist/*"
+  },
+  "kb": {
+    "manifest": "./dist/manifest.v2.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "pretype-check": "pnpm --filter @kb-labs/ai-review-plugin build",
+    "clean": "rimraf dist",
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --config tsup.config.ts --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@kb-labs/ai-review-contracts": "workspace:*",
+    "@kb-labs/ai-review-core": "workspace:*",
+    "@kb-labs/ai-review-providers": "workspace:*",
+    "@kb-labs/plugin-manifest": "link:../../../kb-labs-plugin/packages/manifest",
+    "picomatch": "^4.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@types/node": "^20.16.10",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.1.0",
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
