@@ -15,9 +15,9 @@ This template inherits shared tooling from `@kb-labs/devkit`: ESLint/Prettier/Vi
 The template **adopts DevKit synchronization**:
 
 - Tooling configs are **thin wrappers** over DevKit exports (no local forks)
-- Cursor agents (`.kb/devkit/agents/`, `.cursorrules`, `AGENTS.md`) are synchronized from DevKit via:
+- Cursor agents (`/agents`, `.cursorrules`, `AGENTS.md`) are synchronized from DevKit via:
   ```bash
-  pnpm devkit:sync
+  pnpm agents:sync
   ```
 - Before major contributions and releases, run the sync to ensure alignment
 
@@ -39,11 +39,9 @@ The template **adopts DevKit synchronization**:
 ## Implementation
 
 - `eslint.config.js`, `vitest.config.ts`, `tsconfig.base.json` extend/import DevKit presets
-- `pnpm devkit:sync` copies the latest agent definitions to `.kb/devkit/agents/`
+- `pnpm agents:sync` copies the latest agent definitions
 - CI reuses DevKit workflows via `uses: KirillBaranov/kb-labs-devkit/.github/workflows/...@main` (or versioned tags later)
 
 ## References
 
 - DevKit ADR: `@kb-labs/devkit/docs/adr/0001-repo-synchronization-via-devkit.md`
-
-

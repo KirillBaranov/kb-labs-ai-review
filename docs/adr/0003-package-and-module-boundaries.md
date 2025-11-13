@@ -18,6 +18,7 @@ Products in KB Labs often require multiple internal packages. Without strict bou
   - `types/` — exported types & schemas
 - Packages must only depend on public exports of other packages
 - Cross-package imports must use workspace aliases (`@kb-labs/<pkg>`)
+- Plugin templates must include a `@kb-labs/<plugin-id>-contracts` package that exposes only types, manifests, and schemas (no Node/FS dependencies) so other surfaces can rely on a stable public contract.
 - Domain rules:
   - Core logic in `@kb-labs/core`
   - Product-specific code in `@kb-labs/<product>`
@@ -35,5 +36,3 @@ Products in KB Labs often require multiple internal packages. Without strict bou
 
 - Requires discipline to maintain boundaries
 - More complex dependency management
-
-

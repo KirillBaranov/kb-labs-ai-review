@@ -47,5 +47,3 @@ _Will this decision be revisited in the future?_
 
 **Last Updated:** YYYY-MM-DD  
 **Next Review:** YYYY-MM-DD (if scheduled)
-
-

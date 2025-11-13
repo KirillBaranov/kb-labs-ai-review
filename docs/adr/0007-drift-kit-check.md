@@ -26,8 +26,8 @@ This approach ensures that any drift is detected early, maintaining the integrit
 
 The drift check is implemented via a script located at `scripts/devkit-sync.mjs`. This script facilitates two main commands:
 
-- `pnpm devkit:sync`: Synchronizes the project configuration files with the baseline sources provided by the `@kb-labs/devkit` package
-- `pnpm devkit:check`: Verifies the consistency of the project files against the baseline. It compares the current project files against the source files in `@kb-labs/devkit`, reports any differences found, and exits with code 2 if any drift is detected
+- `pnpm sync`: Synchronizes the project configuration files with the baseline sources provided by the `@kb-labs/devkit` package
+- `pnpm drift-check`: Verifies the consistency of the project files against the baseline. It compares the current project files against the source files in `@kb-labs/devkit`, reports any differences found, and exits with code 2 if any drift is detected
 
 When drift is detected, the script outputs a detailed log showing the files that differ and the specific discrepancies, enabling developers to quickly identify and address the issues.
 
@@ -70,5 +70,3 @@ This mechanism ensures that any unintended changes are caught early, preserving 
 - Additional CI pipeline steps and maintenance overhead
 - Need to maintain baseline definitions as DevKits evolve
 - Dependency on DevKit availability for drift checks
-
-

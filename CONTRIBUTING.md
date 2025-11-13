@@ -1,108 +1,75 @@
-# Contributing to KB Labs AI Review
+# Contributing Guide
 
-Thanks for your interest in contributing 🚀  
-We welcome pull requests, bug reports, and feature discussions.  
-To keep the project healthy and consistent, please follow these guidelines.
+Thanks for helping grow the KB Labs AI Review plugin!
 
 ---
 
-## 🛠 Development Setup
+## 🧰 Local development
 
-1. **Fork & clone** the repository:
-```bash
-git clone https://github.com/<your-fork>/sentinel-ai.git
-cd sentinel-ai
-```
-2. **Install dependencies** (pnpm is required): 
 ```bash
 pnpm install
-```
-3.	**Build all packages**: 
-  ```bash
-pnpm -r build
-  ```
-4.  **Run tests & lint:**
- ```bash
-pnpm test
-pnpm lint
- ```
-
-## 📂 Project Structure
-*	packages/core → core library (parsing, normalization, rendering)
-*	packages/cli → CLI tool (sentinel)
-*	packages/providers/* → provider integrations (OpenAI, Claude, Mock)
-*	profiles/<domain> → rules, handbook, ADRs per domain
-*	apps/demo → demo app for testing review
-*	tools/ → build, metrics, and helper scripts
-
-## 📜 Commit Convention
-
-We use Conventional Commits:
-```bash
-<type>(<scope>): <message>
+pnpm --filter @kb-labs/ai-review-plugin run build # optional warm-up
+pnpm --filter @kb-labs/ai-review-plugin test
 ```
 
-**Common types:**
-*	feat: new feature
-*	fix: bug fix
-*	docs: documentation changes (README, handbook, ADRs)
-*	test: add or update tests
-*	refactor: code restructuring (incl. TypeScript types)
-*	chore: build process, tooling, dependencies
+Handy scripts:
 
-**Examples**:
-*	feat(cli): add review command
-*	fix(core): correct diff parser edge cases
-*	docs(readme): update Quick Start section
-*	test(core): add normalize() unit tests
+- `pnpm verify` – lint + type-check + test across all packages
+- `pnpm kb ai-review run --diff <file>` – execute the CLI command from source
+- `pnpm devkit:sync` – align configs with `@kb-labs/devkit`
 
-⸻
+## 📐 Engineering guidelines
 
-## ✅ Pull Request Guidelines
-1.	Create a feature branch:
-```bash
-git checkout -b feat/my-feature
+### Layering
+
+- `contracts` → `core` → `providers` → `plugin`
+- CLI/workflow surfaces remain thin adapters over `executeReview`
+- Core heuristics stay deterministic and side-effect free (no fs/net)
+- Providers wrap core heuristics and emit `AiReviewRun` payloads
+
+### Code quality
+
+- Follow ESLint + Prettier (run `pnpm lint`)
+- TypeScript is strict; add explicit types at package boundaries
+- Use Vitest for providers/runtime tests (`packages/**/tests`)
+- Update docs and manifests when contracts change
+
+### Manifest checklist
+
+1. Register new commands/workflow steps in `packages/ai-review-plugin/src/manifest.v2.ts`.
+2. Declare permissions (fs/env/quotas) required by the feature.
+3. Add tsup entry points so build artifacts include new handlers.
+4. Provide tests and documentation updates reflecting the change.
+
+### Conventional commits
+
 ```
-2. 	Ensure tests and lint pass before pushing:
-```bash
-pnpm lint
-pnpm test
+feat: add boundary heuristic for shared packages
+fix: correct ai-review run context paths
+docs: refresh getting started guide
+refactor: extract provider resolver helper
+test: cover mock provider fingerprints
+chore: bump devkit
 ```
-
-## Update documentation if needed (README.md, handbook, ADRs).
-* Keep PRs small and focused (one logical change per PR).
-* Write a clear PR description:
-* Problem — what’s the issue?
-* Solution — what you did
-* Notes/Trade-offs — anything reviewers should know
-
-⸻
-
-## 🧪 Testing
-*	Unit tests:
-```bash
-pnpm -r test
-```
-
-* Coverage:
-```bash
-pnpm test:coverage
-```
-
-We use Vitest and @testing-library conventions.
-
-## 🏗️ Architecture Decisions
-
-- For significant architectural changes, add an ADR in `docs/adr/`
-- Follow the ADR template in `docs/adr/0000-template.md`
-- Include required metadata (Date, Status, Deciders, **Last Reviewed**, **Tags**)
-- **Last Reviewed** date is required and should be updated periodically
-- **Tags** are mandatory (minimum 1, maximum 5 tags from approved list)
-- See [Documentation Standard](./docs/DOCUMENTATION.md) for ADR format requirements
 
 ---
 
-**See [Documentation Standard](./docs/DOCUMENTATION.md) for complete documentation guidelines.**
+## 🔄 Pull request workflow
 
+Before opening a PR:
 
+1. Branch off `main`.
+2. Implement changes following layering + manifest guidelines.
+3. Run `pnpm verify`.
+4. Update docs (`README`, guides, ADRs) when contracts, workflows, or CLI behaviour change.
+5. Provide CLI transcripts or artifact samples when appropriate.
 
+PR requirements:
+
+- Include tests proving behaviour (core, providers, runtime).
+- Reference related issues or ADRs.
+- Ensure CI is green and request maintainer review.
+
+---
+
+Documentation standards live in [`docs/DOCUMENTATION.md`](./docs/DOCUMENTATION.md). Capture major structural decisions with ADRs under [`docs/adr/`](./docs/adr/).

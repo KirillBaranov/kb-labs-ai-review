@@ -44,5 +44,3 @@ KB Labs products are designed to be reusable across different stacks, domains, a
 
 - **Hardcoded integrations** — rejected (not scalable, not reusable)
 - **Separate extension repositories** — rejected (too fragmented, harder to maintain)
-
-

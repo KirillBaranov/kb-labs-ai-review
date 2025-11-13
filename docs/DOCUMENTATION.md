@@ -1,82 +1,74 @@
 # KB Labs AI Review Documentation Standard
 
-> **This document is a project-specific copy of the KB Labs Documentation Standard.**  
-> See [Main Documentation Standard](https://github.com/KirillBaranov/kb-labs/blob/main/docs/DOCUMENTATION.md) for the complete ecosystem standard.
+> **This document adapts the KB Labs Documentation Standard for the AI Review plugin.**  
+> See the [main standard](https://github.com/KirillBaranov/kb-labs/blob/main/docs/DOCUMENTATION.md) for baseline requirements shared across the ecosystem.
 
-This document defines the documentation standards for **KB Labs AI Review**. This project follows the [KB Labs Documentation Standard](https://github.com/KirillBaranov/kb-labs/blob/main/docs/DOCUMENTATION.md) with the following project-specific customizations:
+## Project-specific focus areas
 
-## Project-Specific Customizations
+AI Review documentation should prioritise:
 
-KB Labs AI Review is an AI-powered code review framework with profile-based rules. Documentation should focus on:
+- How to execute the review pipeline via CLI and workflows.
+- Contract stability for artifacts (`AiReviewRun`, Markdown/HTML reports, context bundle).
+- Extending heuristics, providers, and risk scoring.
+- Operational guidance (profiles, context limits, CI integration).
 
-- Profile-based review rules
-- Provider integrations (OpenAI, Claude, Mock)
-- Review rendering (JSON + Markdown)
-- GitHub/GitLab integration
-- Migration from legacy architecture
-
-## Project Documentation Structure
+## Repository documentation structure
 
 ```
 docs/
-├── DOCUMENTATION.md       # This standard (REQUIRED)
-├── MIGRATION.md           # Migration guide from legacy
-├── migration-plan-full.md # Full migration plan
-├── migration-audit.md     # Migration audit
-├── refactoring-plan.md    # Refactoring plan
+├── DOCUMENTATION.md        # This document
+├── overview.md             # Product summary and package map
+├── getting-started.md      # Quick start for local runs
+├── cli-guide.md            # Command reference
+├── architecture.md         # Package boundaries and flows
+├── faq.md                  # Troubleshooting
 └── adr/                    # Architecture Decision Records
-    ├── 0000-template.md   # ADR template
-    └── *.md                # ADR files
+    ├── 0000-template.md    # ADR template
+    └── 0001-*.md           # Project ADRs
 ```
 
-## Required Documentation
+## Required documents
 
-This project requires:
+- [x] Root `README.md` describing the workspace and quick start.
+- [x] `CONTRIBUTING.md` with development workflow and manifest checklist.
+- [x] `docs/overview.md`
+- [x] `docs/getting-started.md`
+- [x] `docs/cli-guide.md`
+- [x] `docs/architecture.md`
+- [x] `docs/faq.md`
+- [x] `docs/adr/0000-template.md`
 
-- [x] `README.md` in root with all required sections
-- [x] `CONTRIBUTING.md` in root with development guidelines
-- [x] `docs/DOCUMENTATION.md` (this file)
-- [ ] `docs/adr/0000-template.md` (ADR template - should be created from main standard)
-- [x] `LICENSE` in root
+## Optional additions
 
-## Optional Documentation
+Consider adding when the feature set expands:
 
-This project has:
+- `docs/providers.md` – catalog available providers and configuration knobs.
+- `docs/examples.md` – end-to-end CI examples, artifact consumption patterns.
+- `docs/analytics.md` – when analytics emissions are implemented.
+- Glossary entries for risk scoring, fingerprinting, and profile terminology.
 
-- [x] `docs/MIGRATION.md` - Migration guide
-- [x] `docs/migration-plan-full.md` - Full migration plan
-- [x] `docs/migration-audit.md` - Migration audit
-- [x] `docs/refactoring-plan.md` - Refactoring plan
+## ADR expectations
 
-## ADR Requirements
+- Follow the template in `docs/adr/0000-template.md`.
+- Capture significant changes: new providers, artifact schema updates, analytics integration, workflow behaviour.
+- Include tags from the approved list (architecture, process, runtime, contracts, dx, etc.).
+- Link PRs and related ADRs for traceability.
 
-All ADRs must follow the format defined in the [main standard](https://github.com/KirillBaranov/kb-labs/blob/main/docs/DOCUMENTATION.md#architecture-decision-records-adr) with:
+## Cross-linking
 
-- Required metadata: Date, Status, Deciders, Last Reviewed, Tags
-- Minimum 1 tag, maximum 5 tags
-- Tags from approved list
-- See main standard `docs/templates/ADR.template.md` for template
+**Dependencies**
+- [`@kb-labs/shared-review-types`](https://github.com/KirillBaranov/kb-labs-shared) – shared finding contracts.
+- [`@kb-labs/shared-profiles`](https://github.com/KirillBaranov/kb-labs-shared) – source for profile rules and boundaries.
+- [`@kb-labs/devkit`](https://github.com/KirillBaranov/kb-labs-devkit) – linting/TypeScript/build presets.
 
-## Cross-Linking
-
-This project links to:
-
-**Dependencies:**
-- [@kb-labs/core](https://github.com/KirillBaranov/kb-labs-core) - Core utilities
-- [@kb-labs/shared](https://github.com/KirillBaranov/kb-labs-shared) - Shared types
-- [@kb-labs/cli](https://github.com/KirillBaranov/kb-labs-cli) - CLI commands
-
-**Used By:**
-- All KB Labs projects for code review
-- CI/CD pipelines
-
-**Ecosystem:**
-- [KB Labs](https://github.com/KirillBaranov/kb-labs) - Main ecosystem repository
+**Used by**
+- KB CLI workflows (`kb ai-review run`).
+- KB workflow engine step `ai-review.workflow.run`.
+- Future Studio or REST surfaces (tracked in ADRs when added).
 
 ---
 
-**Last Updated:** 2025-11-03  
-**Standard Version:** 1.0 (following KB Labs ecosystem standard)  
-**See Main Standard:** [KB Labs Documentation Standard](https://github.com/KirillBaranov/kb-labs/blob/main/docs/DOCUMENTATION.md)
+**Last Updated:** 2025-11-13  
+**Standard Version:** 1.0 (aligned with KB Labs ecosystem standard)
 
 
