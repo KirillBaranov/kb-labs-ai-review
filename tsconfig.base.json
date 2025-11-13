@@ -1,25 +1,6 @@
 {
-  "extends": "@kb-labs/devkit/tsconfig/node.json",
-  "compilerOptions": {
-    "declaration": true,
-    "declarationMap": false,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@kb-labs/ai-review-core": ["packages/core/dist"],
-      "@kb-labs/ai-review-core/*": ["packages/core/dist/*"],
-      "@kb-labs/ai-review-cli": ["packages/cli/dist"],
-      "@kb-labs/ai-review-cli/*": ["packages/cli/dist/*"],
-      "@kb-labs/ai-review-analytics": ["packages/analytics/dist"],
-      "@kb-labs/ai-review-analytics/*": ["packages/analytics/dist/*"],
-      "@kb-labs/ai-review-provider-types": ["packages/providers/types/dist"],
-      "@kb-labs/ai-review-provider-types/*": ["packages/providers/types/dist/*"],
-      "@kb-labs/ai-review-provider-mock": ["packages/providers/mock/dist"],
-      "@kb-labs/ai-review-provider-mock/*": ["packages/providers/mock/dist/*"],
-      "@kb-labs/ai-review-provider-local": ["packages/providers/local/dist"],
-      "@kb-labs/ai-review-provider-local/*": ["packages/providers/local/dist/*"],
-      "@kb-labs/shared-review-types": ["../kb-labs-shared/packages/review-types/dist"],
-      "@kb-labs/shared-review-types/*": ["../kb-labs-shared/packages/review-types/dist/*"]
-    }
-  }
+  "extends": [
+    "@kb-labs/devkit/tsconfig/node.json",
+    "./tsconfig.paths.json"
+  ]
 }

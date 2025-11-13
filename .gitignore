@@ -21,7 +21,6 @@ build/
 tmp/
 *.tsbuildinfo
 *.tgz
-**/tsup.config.bundled_*.mjs
 
 # ───────────────
 # Testing
@@ -29,7 +28,6 @@ tmp/
 coverage/
 .vitest/
 .vscode-test/
-*.snap
 
 # ───────────────
 # IDE & OS junk
@@ -60,16 +58,10 @@ apps/*/coverage/
 packages/*/coverage/
 
 # ───────────────
-# AI Review specific
+# custom
 # ───────────────
-.sentinel/
-.sentinel/context/
-.sentinel/reviews/
-.sentinel/exports/
-.sentinel/analytics/
-.ai-review/
+*.sqlite
+*.db
 
-# ───────────────
-# KB Labs DevKit
-# ───────────────
+# DevKit provenance
 .kb/devkit/tmp/

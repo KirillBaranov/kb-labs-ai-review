@@ -2,15 +2,16 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "composite": false
+    "allowJs": true,
+    "types": ["node", "vitest/globals"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
-  "exclude": [
-    "**/dist/**",
-    "**/node_modules/**",
-    "**/coverage/**",
-    "**/tsup.config.ts",
-    "**/vitest.config.ts",
-    "apps/**"
-  ]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.cjs",
+    "**/*.mjs",
+    "vitest.config.ts"
+  ],
+  "exclude": ["dist", "coverage", "node_modules"]
 }
