@@ -70,7 +70,7 @@ Use `--fail-on major` or `--fail-on critical` to make the command exit non-zero 
 
 ## 7. Run via workflow
 
-The same pipeline is exposed as the `ai-review.workflow.run` step. When the KB workflow engine invokes this step, it passes the same input shape as the CLI command and receives identical artifacts. See [`workflow-step`](../packages/ai-review-plugin/src/runtime/workflow.ts) for reference implementation.
+The same pipeline is exposed as the `ai-review.workflow.run` step. When the KB workflow engine invokes this step, it passes the same input shape as the CLI command and receives identical artifacts. See [`workflow-step`](../kb-labs-ai-review/packages/ai-review-plugin/src/runtime/workflow.ts) for reference implementation.
 
 ## 8. Next steps
 

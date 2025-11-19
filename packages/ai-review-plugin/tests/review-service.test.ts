@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { executeReview } from '../src/runtime/review-service.js';
+import { executeReview } from '../src/application/review-service.js';
 
 const PROFILE = 'frontend';
 

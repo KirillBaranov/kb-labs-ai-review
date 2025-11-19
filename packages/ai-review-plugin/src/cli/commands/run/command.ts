@@ -2,7 +2,7 @@ import path from 'node:path';
 import { Writable } from 'node:stream';
 import type { CliHandlerContext } from '@kb-labs/sandbox';
 import type { AiReviewCommandOutput } from '@kb-labs/ai-review-contracts';
-import { executeReview, type FailMode } from '../../../runtime/review-service.js';
+import { executeReview, type FailMode } from '../../../application/review-service.js';
 
 export interface RunCommandArgs {
   diff: string;

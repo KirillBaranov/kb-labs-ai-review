@@ -147,25 +147,72 @@ export const manifest: ManifestV2 = {
       }
     ]
   },
+  setup: {
+    handler: './setup/handler.js#run',
+    describe: 'Create .ai-review workspace directory with initial files.',
+    permissions: {
+      fs: {
+        mode: 'readWrite',
+        allow: ['.ai-review/**', '**/*.diff', '**/*.patch'],
+        deny: ['**/*.key', '**/*.secret'],
+      },
+      net: 'none',
+      env: {
+        allow: ['NODE_ENV'],
+      },
+      quotas: {
+        timeoutMs: 5000,
+        memoryMb: 64,
+        cpuMs: 2500,
+      },
+      capabilities: ['fs:read', 'fs:write'],
+    },
+  },
   capabilities: [],
   permissions: {
     fs: {
-      mode: 'read',
-      allow: [],
-      deny: ['**/*.key', '**/*.secret']
+      mode: 'readWrite',
+      allow: ['.ai-review/**', '**/*.diff', '**/*.patch', 'docs/**', '**/boundaries.json'],
+      deny: ['**/*.key', '**/*.secret'],
     },
     net: 'none',
     env: {
-      allow: ['NODE_ENV']
+      allow: ['NODE_ENV'],
     },
     quotas: {
-      timeoutMs: 10000,
-      memoryMb: 128,
-      cpuMs: 5000
+      timeoutMs: 60000,
+      memoryMb: 512,
+      cpuMs: 30000,
     },
-    capabilities: []
+    capabilities: ['fs:read', 'fs:write'],
   },
-  artifacts: []
+  artifacts: [
+    {
+      id: 'ai-review.review.json',
+      pathTemplate: '.ai-review/review.json',
+      description: 'Full review payload in JSON format (AiReviewRun contract).',
+    },
+    {
+      id: 'ai-review.review.md',
+      pathTemplate: '.ai-review/review.md',
+      description: 'Transport Markdown with embedded JSON payload.',
+    },
+    {
+      id: 'ai-review.review-human.md',
+      pathTemplate: '.ai-review/review-human.md',
+      description: 'Human-readable Markdown report (when --render-md is enabled).',
+    },
+    {
+      id: 'ai-review.review.html',
+      pathTemplate: '.ai-review/review.html',
+      description: 'HTML report (when --render-html is enabled).',
+    },
+    {
+      id: 'ai-review.context.json',
+      pathTemplate: '.ai-review/context.json',
+      description: 'Context used for review (if context saving is enabled).',
+    },
+  ],
 };
 
 export default manifest;

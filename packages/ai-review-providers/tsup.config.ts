@@ -1,10 +1,11 @@
-import config from '@kb-labs/devkit/tsup/node.js';
+import { defineConfig } from 'tsup';
+import nodePreset from '@kb-labs/devkit/tsup/node.js';
 
-export default {
-  ...config,
+export default defineConfig({
+  ...nodePreset,
   entry: {
     index: 'src/index.ts'
   },
-  external: ['node:crypto'],
+  tsconfig: "tsconfig.build.json", // Use build-specific tsconfig without paths
   clean: true
-};
+});

@@ -13,12 +13,8 @@ export default defineConfig({
     'src/runtime/artifacts.ts',
     'src/runtime/workflow.ts'
   ],
-  external: [
-    '@kb-labs/plugin-manifest',
-    '@kb-labs/ai-review-contracts',
-    '@kb-labs/ai-review-core',
-    '@kb-labs/ai-review-providers'
-  ],
+  tsconfig: "tsconfig.build.json", // Use build-specific tsconfig without paths
+  // nodePreset already includes all workspace packages as external via tsup.external.json
   dts: {
     resolve: true,
     skipLibCheck: true
