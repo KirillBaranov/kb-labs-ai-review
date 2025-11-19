@@ -1,6 +1,10 @@
-import type { ManifestV2 } from '@kb-labs/plugin-manifest';
+import { createManifestV2 } from '@kb-labs/plugin-manifest';
+import { pluginContractsManifest } from '@kb-labs/ai-review-contracts';
 
-export const manifest: ManifestV2 = {
+/**
+ * Level 2: Типизация через contracts для автодополнения и проверки ID
+ */
+export const manifest = createManifestV2<typeof pluginContractsManifest>({
   schema: 'kb.plugin/2',
   id: '@kb-labs/ai-review',
   version: '0.0.1',
@@ -213,6 +217,6 @@ export const manifest: ManifestV2 = {
       description: 'Context used for review (if context saving is enabled).',
     },
   ],
-};
+});
 
 export default manifest;

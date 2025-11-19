@@ -1,38 +1,60 @@
-import type { ApiContract } from './types/api.js';
-import type { PluginArtifactContract } from './types/artifacts.js';
-import type { CommandContract } from './types/commands.js';
-import type { WorkflowContract } from './types/workflows.js';
-import type { ContractsSchemaId } from './version.js';
+// Re-export types for consistency with other contracts packages
 
-export const AI_REVIEW_PLUGIN_ID = '@kb-labs/ai-review' as const;
+export type ArtifactKind = 'file' | 'json' | 'markdown' | 'binary' | 'dir' | 'log' | 'text' | 'html';
 
-export type AiReviewArtifactId =
-  | 'ai-review.context'
-  | 'ai-review.review.json'
-  | 'ai-review.review.md'
-  | 'ai-review.review.human-md'
-  | 'ai-review.review.html';
-
-export type AiReviewCommandId = 'ai-review:run';
-
-export type AiReviewWorkflowId = 'ai-review.workflow.run';
-
-export type AiReviewArtifactContracts = Record<AiReviewArtifactId, PluginArtifactContract>;
-export type AiReviewCommandContracts = Record<AiReviewCommandId, CommandContract>;
-export type AiReviewWorkflowContracts = Record<AiReviewWorkflowId, WorkflowContract>;
-
-export interface PluginContracts {
-  schema: ContractsSchemaId;
-  pluginId: string;
-  contractsVersion: string;
-  artifacts: AiReviewArtifactContracts;
-  commands: AiReviewCommandContracts;
-  workflows: AiReviewWorkflowContracts;
-  api?: ApiContract;
+export interface ArtifactExample {
+  summary?: string;
+  payload?: unknown;
 }
 
-export type { ApiContract, RestApiContract, RestRouteContract, SchemaReference } from './types/api.js';
-export type { ArtifactKind, ArtifactContractsMap, PluginArtifactContract, ArtifactExample } from './types/artifacts.js';
-export type { CommandContract, CommandContractsMap } from './types/commands.js';
-export type { WorkflowContract, WorkflowContractsMap, WorkflowStepContract } from './types/workflows.js';
+export interface PluginArtifactContract {
+  id: string;
+  kind: ArtifactKind;
+  description?: string;
+  pathPattern?: string;
+  mediaType?: string;
+  schemaRef?: string;
+  example?: ArtifactExample;
+}
 
+export type ArtifactContractsMap = Record<string, PluginArtifactContract>;
+
+export interface SchemaReference {
+  ref: string;
+  format?: 'zod' | 'json-schema' | 'openapi';
+  description?: string;
+}
+
+export interface CommandContract {
+  id: string;
+  description?: string;
+  input?: SchemaReference;
+  output?: SchemaReference;
+  produces?: string[];
+  consumes?: string[];
+  examples?: string[];
+}
+
+export type CommandContractsMap = Record<string, CommandContract>;
+
+export interface PluginContracts {
+  schema: 'kb.plugin.contracts/1';
+  pluginId: string;
+  contractsVersion: string;
+  artifacts: ArtifactContractsMap;
+  commands?: CommandContractsMap;
+  workflows?: Record<string, unknown>;
+  api?: {
+    rest?: {
+      basePath: string;
+      routes: Record<string, {
+        id: string;
+        method: string;
+        path: string;
+        description?: string;
+        request?: SchemaReference;
+        response?: SchemaReference;
+      }>;
+    };
+  };
+}

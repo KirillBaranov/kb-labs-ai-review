@@ -1,23 +1,15 @@
 {
   "name": "@kb-labs/ai-review-contracts",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Contracts for KB Labs AI Review plugin.",
   "type": "module",
   "private": true,
-  "description": "Public contracts for KB Labs AI Review: artifacts, commands, workflows, and schemas.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./contract": {
-      "import": "./dist/contract.js",
-      "types": "./dist/contract.d.ts"
-    },
-    "./schema": {
-      "import": "./dist/schema.js",
-      "types": "./dist/schema.d.ts"
     },
     "./dist/*": "./dist/*"
   },
@@ -27,32 +19,34 @@
     "LICENSE"
   ],
   "sideEffects": false,
-  "scripts": {
-    "pretype-check": "pnpm --filter @kb-labs/ai-review-contracts build",
-    "clean": "rimraf dist",
-    "build": "tsup --config tsup.config.ts",
-    "dev": "tsup --config tsup.config.ts --watch",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
-    "type-check": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+  "author": {
+    "name": "Kirill Baranov",
+    "url": "https://github.com/kirill-baranov"
   },
-  "dependencies": {
-    "zod": "^3.23.8"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kirill-baranov/kb-labs-ai-review.git",
+    "directory": "packages/ai-review-contracts"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@kb-labs/devkit": "link:../../../kb-labs-devkit",
-    "@types/node": "^20.16.10",
+    "@types/node": "^24.7.0",
     "eslint": "^9.13.0",
     "rimraf": "^6.0.1",
-    "tsup": "^8.1.0",
-    "typescript": "^5.6.3",
-    "vitest": "^3.2.4"
+    "tsup": "^8.5.0",
+    "typescript": "^5.6.3"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=18.18.0",
     "pnpm": ">=9.0.0"
   }
 }
-

@@ -1,15 +1,11 @@
 import { defineConfig } from 'tsup';
-import nodePreset from '@kb-labs/devkit/tsup/node.js';
 
 export default defineConfig({
-  ...nodePreset,
-  entry: ['src/index.ts', 'src/schema.ts', 'src/contract.ts'],
-  tsconfig: "tsconfig.build.json", // Use build-specific tsconfig without paths
-  dts: {
-    resolve: true,
-    skipLibCheck: true
-  },
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  dts: true,
+  splitting: false,
+  sourcemap: true,
   clean: true,
-  sourcemap: true
+  treeshake: true,
 });
-
