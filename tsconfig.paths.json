@@ -123,6 +123,12 @@
       "@kb-labs/cli-bin/*": [
         "../kb-labs-cli/packages/cli/src/*"
       ],
+      "@kb-labs/cli-command-kit": [
+        "../kb-labs-cli/packages/command-kit/src/index.ts"
+      ],
+      "@kb-labs/cli-command-kit/*": [
+        "../kb-labs-cli/packages/command-kit/src/*"
+      ],
       "@kb-labs/cli-commands": [
         "../kb-labs-cli/packages/commands/src/index.ts"
       ],

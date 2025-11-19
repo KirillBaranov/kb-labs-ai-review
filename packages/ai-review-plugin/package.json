@@ -41,6 +41,7 @@
     "@kb-labs/ai-review-contracts": "workspace:*",
     "@kb-labs/ai-review-core": "workspace:*",
     "@kb-labs/ai-review-providers": "workspace:*",
+    "@kb-labs/cli-command-kit": "workspace:*",
     "@kb-labs/plugin-manifest": "link:../../../kb-labs-plugin/packages/manifest",
     "picomatch": "^4.0.3",
     "zod": "^3.23.8"
