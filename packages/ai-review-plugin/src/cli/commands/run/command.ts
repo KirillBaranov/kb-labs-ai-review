@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { Writable } from 'node:stream';
+import { defineCommand, type CommandResult } from '@kb-labs/cli-command-kit';
 import type { CliHandlerContext } from '@kb-labs/sandbox';
 import type { AiReviewCommandOutput } from '@kb-labs/ai-review-contracts';
 import { executeReview, type FailMode } from '../../../application/review-service.js';
@@ -207,6 +208,160 @@ export async function executeRunCommand(
 
   return output;
 }
+
+type AiReviewRunFlags = {
+  diff: { type: 'string'; description?: string; alias?: string; required: true };
+  file: { type: 'string'; description?: string };
+  branch: { type: 'string'; description?: string };
+  staged: { type: 'boolean'; description?: string; default?: boolean };
+  profile: { type: 'string'; description?: string; alias?: string; default?: string };
+  'profiles-dir': { type: 'string'; description?: string };
+  provider: { type: 'string'; description?: string; choices?: readonly string[]; default?: string };
+  'fail-on': { type: 'string'; description?: string; choices?: readonly string[] };
+  'max-comments': { type: 'number'; description?: string };
+  'render-md': { type: 'boolean'; description?: string; default?: boolean };
+  'render-html': { type: 'boolean'; description?: string; default?: boolean };
+  'no-render': { type: 'boolean'; description?: string; default?: boolean };
+  json: { type: 'boolean'; description?: string; default?: boolean };
+  'out-json': { type: 'string'; description?: string };
+  'out-md': { type: 'string'; description?: string };
+  'include-adr': { type: 'boolean'; description?: string; default?: boolean };
+  'include-boundaries': { type: 'boolean'; description?: string; default?: boolean };
+  'context-max-bytes': { type: 'number'; description?: string };
+  'context-max-approx-tokens': { type: 'number'; description?: string };
+  'output-root': { type: 'string'; description?: string };
+};
+
+type AiReviewRunResult = CommandResult & {
+  exitCode?: number;
+  result?: AiReviewCommandOutput;
+};
+
+export const run = defineCommand<AiReviewRunFlags, AiReviewRunResult>({
+  name: 'ai-review:run',
+  flags: {
+    diff: {
+      type: 'string',
+      description: 'Path to unified diff file.',
+      alias: 'd',
+      required: true,
+    },
+    file: {
+      type: 'string',
+      description: 'Generate diff for a single file relative to HEAD.',
+    },
+    branch: {
+      type: 'string',
+      description: 'Generate diff against the specified git ref (default: origin/master).',
+    },
+    staged: {
+      type: 'boolean',
+      description: 'Use staged changes (git diff --cached).',
+      default: false,
+    },
+    profile: {
+      type: 'string',
+      description: 'Profile name (default: frontend).',
+      alias: 'p',
+      default: 'frontend',
+    },
+    'profiles-dir': {
+      type: 'string',
+      description: 'Override profiles directory.',
+    },
+    provider: {
+      type: 'string',
+      description: 'Provider id (local|mock).',
+      choices: ['local', 'mock'] as const,
+      default: 'local',
+    },
+    'fail-on': {
+      type: 'string',
+      description: 'Failure policy: none|major|critical.',
+      choices: ['none', 'major', 'critical'] as const,
+    },
+    'max-comments': {
+      type: 'number',
+      description: 'Limit the number of findings returned.',
+    },
+    'render-md': {
+      type: 'boolean',
+      description: 'Render transport Markdown (default: true).',
+      default: true,
+    },
+    'render-html': {
+      type: 'boolean',
+      description: 'Render HTML report.',
+      default: false,
+    },
+    'no-render': {
+      type: 'boolean',
+      description: 'Skip all human-readable renderers.',
+      default: false,
+    },
+    json: {
+      type: 'boolean',
+      description: 'Print JSON output instead of a human summary.',
+      default: false,
+    },
+    'out-json': {
+      type: 'string',
+      description: 'Override review.json output path.',
+    },
+    'out-md': {
+      type: 'string',
+      description: 'Override review.md output path.',
+    },
+    'include-adr': {
+      type: 'boolean',
+      description: 'Include ADR context.',
+      default: false,
+    },
+    'include-boundaries': {
+      type: 'boolean',
+      description: 'Include boundary context.',
+      default: false,
+    },
+    'context-max-bytes': {
+      type: 'number',
+      description: 'Maximum context size in bytes.',
+    },
+    'context-max-approx-tokens': {
+      type: 'number',
+      description: 'Maximum approximate tokens in context.',
+    },
+    'output-root': {
+      type: 'string',
+      description: 'Override output root directory.',
+    },
+  },
+  async handler(ctx, argv, flags) {
+    ctx.logger?.info('AI Review run started', { flags });
+
+    ctx.tracker.checkpoint('review');
+
+    const args = mapFlagsToArgs(flags);
+    if (!args.diff) {
+      throw new Error('Missing required --diff <path> argument');
+    }
+
+    const repoRoot = ctx.cwd ?? process.cwd();
+    const stdout = ctx.output ? {
+      write: (text: string) => ctx.output.write(text),
+    } : process.stdout;
+
+    const output = await executeRunCommand(args, { repoRoot, stdout });
+
+    ctx.tracker.checkpoint('complete');
+
+    ctx.logger?.info('AI Review run completed', { 
+      exitCode: output.exitCode,
+      findingsTotal: output.run.summary?.findingsTotal ?? 0,
+    });
+
+    return { ok: output.exitCode === 0, exitCode: output.exitCode, result: output };
+  },
+});
 
 export async function runAiReviewCommand(
   cliCtx: CliHandlerContext,
