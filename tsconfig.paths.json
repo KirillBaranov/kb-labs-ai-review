@@ -63,6 +63,12 @@
       "@kb-labs/analytics-cli/*": [
         "../kb-labs-analytics/packages/analytics-cli/src/*"
       ],
+      "@kb-labs/analytics-contracts": [
+        "../kb-labs-analytics/packages/analytics-contracts/src/index.ts"
+      ],
+      "@kb-labs/analytics-contracts/*": [
+        "../kb-labs-analytics/packages/analytics-contracts/src/*"
+      ],
       "@kb-labs/analytics-core": [
         "../kb-labs-analytics/packages/analytics-core/src/index.ts"
       ],
@@ -135,6 +141,12 @@
       "@kb-labs/cli-commands/*": [
         "../kb-labs-cli/packages/commands/src/*"
       ],
+      "@kb-labs/cli-contracts": [
+        "../kb-labs-cli/packages/cli-contracts/src/index.ts"
+      ],
+      "@kb-labs/cli-contracts/*": [
+        "../kb-labs-cli/packages/cli-contracts/src/*"
+      ],
       "@kb-labs/cli-core": [
         "../kb-labs-cli/packages/core/src/index.ts"
       ],
@@ -173,6 +185,12 @@
       ],
       "@kb-labs/core-config/*": [
         "../kb-labs-core/packages/config/src/*"
+      ],
+      "@kb-labs/core-contracts": [
+        "../kb-labs-core/packages/core-contracts/src/index.ts"
+      ],
+      "@kb-labs/core-contracts/*": [
+        "../kb-labs-core/packages/core-contracts/src/*"
       ],
       "@kb-labs/core-policy": [
         "../kb-labs-core/packages/policy/src/index.ts"
@@ -297,6 +315,12 @@
       "@kb-labs/mind-llm/*": [
         "../kb-labs-mind/packages/mind-llm/src/*"
       ],
+      "@kb-labs/mind-orchestrator": [
+        "../kb-labs-mind/packages/mind-orchestrator/src/index.ts"
+      ],
+      "@kb-labs/mind-orchestrator/*": [
+        "../kb-labs-mind/packages/mind-orchestrator/src/*"
+      ],
       "@kb-labs/mind-pack": [
         "../kb-labs-mind/packages/mind-pack/src/index.ts"
       ],
@@ -381,6 +405,12 @@
       "@kb-labs/plugin-template-contracts/*": [
         "../kb-labs-plugin-template/packages/contracts/src/*"
       ],
+      "@kb-labs/plugin-testing": [
+        "../kb-labs-plugin/packages/testing/src/index.ts"
+      ],
+      "@kb-labs/plugin-testing/*": [
+        "../kb-labs-plugin/packages/testing/src/*"
+      ],
       "@kb-labs/profile-toolkit": [
         "../kb-labs-core/packages/profile-toolkit/src/index.ts"
       ],
@@ -398,6 +428,12 @@
       ],
       "@kb-labs/release-cli/*": [
         "../kb-labs-release-manager/packages/release-cli/src/*"
+      ],
+      "@kb-labs/release-contracts": [
+        "../kb-labs-release-manager/packages/release-contracts/src/index.ts"
+      ],
+      "@kb-labs/release-contracts/*": [
+        "../kb-labs-release-manager/packages/release-contracts/src/*"
       ],
       "@kb-labs/release-core": [
         "../kb-labs-release-manager/packages/release-core/src/index.ts"

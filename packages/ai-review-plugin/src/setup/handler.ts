@@ -68,7 +68,7 @@ export async function run(ctx: SetupContext = {}) {
     ].join('\n')
   );
 
-  ctx.runtime?.log?.('info', 'AI Review setup completed', { cwd, created });
+  ctx.logger?.info('AI Review setup completed', { cwd, created });
 
   return {
     ok: true,

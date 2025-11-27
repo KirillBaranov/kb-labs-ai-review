@@ -201,6 +201,12 @@ export async function executeRunCommand(
   if (args.json) {
     stdout.write(`${JSON.stringify(output, null, 2)}\n`);
   } else {
+    const summary = output.run.summary;
+    const counts = summary?.findingsBySeverity ?? { critical: 0, major: 0, minor: 0, info: 0 };
+    const top = summary?.topSeverity ?? 'none';
+
+    // Note: Can't use ctx.output.ui.sideBox here as we don't have ctx in executeRunCommand
+    // This function is used by both CLI and programmatic API
     stdout.write(`${formatSummary(output)}\n`);
     stdout.write(`Artifacts stored under ${path.dirname(output.artifacts.reviewJson)}\n`);
     stdout.write(`Exit code: ${output.exitCode}\n`);
@@ -346,18 +352,76 @@ export const run = defineCommand<AiReviewRunFlags, AiReviewRunResult>({
     }
 
     const repoRoot = ctx.cwd ?? process.cwd();
-    const stdout = ctx.output ? {
-      write: (text: string) => ctx.output.write(text),
-    } : process.stdout;
 
-    const output = await executeRunCommand(args, { repoRoot, stdout });
+    // Execute review without output (executeRunCommand will not write to stdout)
+    const output = await executeReview({
+      diffPath: args.diff,
+      repoRoot,
+      profile: args.profile ?? 'frontend',
+      provider: args.provider ?? 'local',
+      failOn: args.failOn,
+      maxComments: args.maxComments,
+      profilesDir: args.profilesDir,
+      render: {
+        humanMarkdown: args.renderHumanMarkdown !== false,
+        html: args.renderHtml === true
+      },
+      context: {
+        includeAdr: args.includeAdr,
+        includeBoundaries: args.includeBoundaries,
+        maxBytes: args.contextMaxBytes,
+        maxApproxTokens: args.contextMaxApproxTokens
+      },
+      output: {
+        root: args.outputRoot
+      }
+    });
 
     ctx.tracker.checkpoint('complete');
 
-    ctx.logger?.info('AI Review run completed', { 
+    ctx.logger?.info('AI Review run completed', {
       exitCode: output.exitCode,
       findingsTotal: output.run.summary?.findingsTotal ?? 0,
     });
+
+    // Format output using sideBox
+    if (args.json) {
+      ctx.output?.json(output);
+    } else {
+      const summary = output.run.summary;
+      const counts = summary?.findingsBySeverity ?? { critical: 0, major: 0, minor: 0, info: 0 };
+      const top = summary?.topSeverity ?? 'none';
+      const total = summary?.findingsTotal ?? 0;
+
+      const status = output.exitCode === 0 ? 'success' : 'error';
+
+      const outputText = ctx.output?.ui.sideBox({
+        title: 'AI Review',
+        sections: [
+          {
+            header: 'Summary',
+            items: [
+              `Findings: ${total}`,
+              `Critical: ${counts.critical}`,
+              `Major: ${counts.major}`,
+              `Minor: ${counts.minor}`,
+              `Info: ${counts.info}`,
+              `Top severity: ${top}`,
+            ],
+          },
+          {
+            header: 'Artifacts',
+            items: [
+              `Location: ${path.dirname(output.artifacts.reviewJson)}`,
+              `Exit code: ${output.exitCode}`,
+            ],
+          },
+        ],
+        status,
+        timing: ctx.tracker.total(),
+      });
+      ctx.output?.write(outputText);
+    }
 
     return { ok: output.exitCode === 0, exitCode: output.exitCode, result: output };
   },

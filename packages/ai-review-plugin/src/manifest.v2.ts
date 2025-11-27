@@ -16,7 +16,7 @@ export const manifest = createManifestV2<typeof pluginContractsManifest>({
   cli: {
     commands: [
       {
-        id: 'ai-review:run',
+        id: 'run',
         group: 'ai-review',
         describe: 'Run AI Review against a unified diff and emit artifacts.',
         longDescription: 'Executes AI Review providers, builds context, and writes artifacts under .ai-review/.',
