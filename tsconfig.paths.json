@@ -507,6 +507,24 @@
       "@kb-labs/shared-textops/*": [
         "../kb-labs-shared/packages/textops/src/*"
       ],
+      "@kb-labs/state-broker": [
+        "../kb-labs-core/packages/state-broker/src/index.ts"
+      ],
+      "@kb-labs/state-broker/*": [
+        "../kb-labs-core/packages/state-broker/src/*"
+      ],
+      "@kb-labs/state-daemon": [
+        "../kb-labs-core/packages/state-daemon/src/index.ts"
+      ],
+      "@kb-labs/state-daemon/*": [
+        "../kb-labs-core/packages/state-daemon/src/*"
+      ],
+      "@kb-labs/tenant": [
+        "../kb-labs-core/packages/tenant/src/index.ts"
+      ],
+      "@kb-labs/tenant/*": [
+        "../kb-labs-core/packages/tenant/src/*"
+      ],
       "@kb-labs/ui-core": [
         "../kb-labs-studio/packages/ui-core/src/index.ts"
       ],
