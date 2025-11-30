@@ -4,7 +4,7 @@ import {
   AiReviewCommandOutputSchema,
   AiReviewRunSchema,
   parseAiReviewRun
-} from '../src/schema.js';
+} from '../src/schema';
 
 const baseRun = {
   version: 1,

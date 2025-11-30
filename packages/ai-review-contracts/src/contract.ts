@@ -1,5 +1,5 @@
-import type { PluginContracts } from './types.js';
-import { contractsSchemaId, contractsVersion } from './version.js';
+import type { PluginContracts } from './types';
+import { contractsSchemaId, contractsVersion } from './version';
 
 /**
  * AI Review plugin contracts manifest

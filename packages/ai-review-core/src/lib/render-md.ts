@@ -1,5 +1,5 @@
 import type { Severity, ReviewFinding } from '@kb-labs/shared-review-types';
-import { DEFAULT_SEVERITY_MAP, type RenderOptions } from './render-config.js';
+import { DEFAULT_SEVERITY_MAP, type RenderOptions } from './render-config';
 
 type Grouped = Record<Severity, ReviewFinding[]>;
 

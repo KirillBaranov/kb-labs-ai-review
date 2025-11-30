@@ -1,4 +1,4 @@
-import type { SchemaReference } from './api.js';
+import type { SchemaReference } from './api';
 
 export interface CommandContract {
   id: string;

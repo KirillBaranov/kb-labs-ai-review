@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { apiContractSchema } from './api.schema.js';
-import { artifactsContractMapSchema } from './artifacts.schema.js';
-import { commandContractMapSchema } from './commands.schema.js';
-import { workflowContractMapSchema } from './workflows.schema.js';
-import { contractsSchemaId } from '../version.js';
-import { AI_REVIEW_PLUGIN_ID } from '../types.js';
+import { apiContractSchema } from './api.schema';
+import { artifactsContractMapSchema } from './artifacts.schema';
+import { commandContractMapSchema } from './commands.schema';
+import { workflowContractMapSchema } from './workflows.schema';
+import { contractsSchemaId } from '../version';
+import { AI_REVIEW_PLUGIN_ID } from '../types';
 
 export const pluginContractsSchema = z
   .object({

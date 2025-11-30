@@ -1,4 +1,4 @@
-import type { Severity } from './types.js';
+import type { Severity } from './types';
 
 export type RiskWeights = Partial<Record<Severity, number>>;
 export type RiskThresholds = { high: number; medium: number };

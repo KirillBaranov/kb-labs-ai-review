@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { schemaReferenceSchema } from './api.schema.js';
+import { schemaReferenceSchema } from './api.schema';
 
 export const commandContractSchema = z.object({
   id: z.string().min(1),

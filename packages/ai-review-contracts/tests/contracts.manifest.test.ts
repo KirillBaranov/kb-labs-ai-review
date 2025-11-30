@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { pluginContractsManifest } from '../src/contract.js';
-import { parsePluginContracts } from '../src/schema/contract.schema.js';
-import { contractsVersion } from '../src/version.js';
-import { AI_REVIEW_PLUGIN_ID } from '../src/types.js';
+import { pluginContractsManifest } from '../src/contract';
+import { parsePluginContracts } from '../src/schema/contract.schema';
+import { contractsVersion } from '../src/version';
+import { AI_REVIEW_PLUGIN_ID } from '../src/types';
 
 describe('pluginContractsManifest', () => {
   it('is valid according to the schema', () => {

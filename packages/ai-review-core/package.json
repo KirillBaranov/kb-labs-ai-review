@@ -30,18 +30,17 @@
   "dependencies": {
     "@kb-labs/shared-diff": "link:../../../kb-labs-shared/packages/diff",
     "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/review-types",
-    "@kb-labs/core-sys": "link:../../../kb-labs-core/packages/sys",
+    "@kb-labs/core-sys": "link:../../../kb-labs-core/packages/core-sys",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "picomatch": "^4.0.2",
-    "yaml": "^2.8.0"
+    "picomatch": "^4.0.2"
   },
   "devDependencies": {
     "@kb-labs/devkit": "link:../../../kb-labs-devkit",
-    "@types/node": "^20.16.10",
-    "@types/picomatch": "^4.0.2",
+    "@types/node": "^24.3.3",
+    "@types/picomatch": "^4",
     "rimraf": "^6.0.1",
-    "tsup": "^8.1.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.6.3",
     "vitest": "^3.2.4"
   },

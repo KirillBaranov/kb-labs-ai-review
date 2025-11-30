@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analyzeDiff } from '../src/lib/engine.js';
+import { analyzeDiff } from '../src/lib/engine';
 
 function makeDiff(text: string): string {
   return [

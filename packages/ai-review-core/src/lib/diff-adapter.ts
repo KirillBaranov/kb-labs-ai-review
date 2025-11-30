@@ -4,7 +4,7 @@
  */
 
 import type { ParsedDiff } from '@kb-labs/shared-diff';
-import type { FileDiff, Hunk } from './types.js';
+import type { FileDiff, Hunk } from './types';
 
 /**
  * Convert ParsedDiff (shared format) to FileDiff[] (ai-review format)

@@ -1,10 +1,10 @@
 import { parseUnifiedDiff as parseUnifiedDiffShared } from '@kb-labs/shared-diff';
 import { getLogger } from '@kb-labs/core-sys';
-import { parsedDiffToFileDiffs } from './diff-adapter.js';
-import { makeFingerprint } from './normalize.js';
-import type { RulesJson, RuleItem, ReviewFinding } from './types.js';
-import type { BoundariesConfig } from './boundaries.js';
-import { extractImportSpecifier, checkForbidden, toPosix } from './boundaries.js';
+import { parsedDiffToFileDiffs } from './diff-adapter';
+import { makeFingerprint } from './normalize';
+import type { RulesJson, RuleItem, ReviewFinding } from './types';
+import type { BoundariesConfig } from './boundaries';
+import { extractImportSpecifier, checkForbidden, toPosix } from './boundaries';
 
 const log = getLogger('ai-review:engine');
 
