@@ -1,7 +1,7 @@
 import { analyzeDiff } from '@kb-labs/ai-review-core';
 import type { ReviewFinding, RulesJson, RuleItem } from '@kb-labs/shared-review-types';
-import { buildRun } from './run-builder.js';
-import type { ReviewProvider } from './types.js';
+import { buildRun } from './run-builder';
+import type { ReviewProvider } from './types';
 
 function buildRulesMap(rules?: RulesJson | null): Map<string, RuleItem> | undefined {
   if (!rules?.rules) {

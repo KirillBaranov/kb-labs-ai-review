@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { localProvider } from '../src/local.js';
+import { localProvider } from '../src/local';
 import type { BoundariesConfig } from '@kb-labs/ai-review-core';
 import type { RulesJson } from '@kb-labs/shared-review-types';
 

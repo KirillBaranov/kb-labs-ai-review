@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mockProvider } from '../src/mock.js';
+import { mockProvider } from '../src/mock';
 
 describe('@kb-labs/ai-review-providers/mock', () => {
   it('produces deterministic findings for TODO markers', async () => {

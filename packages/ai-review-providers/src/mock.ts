@@ -1,6 +1,6 @@
 import type { ReviewFinding, Severity } from '@kb-labs/shared-review-types';
-import { buildRun } from './run-builder.js';
-import type { ReviewProvider } from './types.js';
+import { buildRun } from './run-builder';
+import type { ReviewProvider } from './types';
 
 export const mockProvider: ReviewProvider = {
   name: 'mock',

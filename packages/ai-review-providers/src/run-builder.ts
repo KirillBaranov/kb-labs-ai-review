@@ -5,7 +5,7 @@ import type {
   AiReviewRun,
   AiReviewFindingsBySeverity
 } from '@kb-labs/ai-review-contracts';
-import type { ProviderReviewInput } from './types.js';
+import type { ProviderReviewInput } from './types';
 
 const SEVERITY_RANK: Record<Severity, number> = {
   critical: 3,
