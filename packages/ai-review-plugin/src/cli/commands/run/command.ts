@@ -1,9 +1,9 @@
 import path from 'node:path';
 import { Writable } from 'node:stream';
-import { defineCommand, type CommandResult } from '@kb-labs/cli-command-kit';
-import type { CliHandlerContext } from '@kb-labs/sandbox';
+import { defineCommand, type CommandResult } from '@kb-labs/shared-command-kit';
+import type { CliHandlerContext } from '@kb-labs/core-sandbox';
 import type { AiReviewCommandOutput } from '@kb-labs/ai-review-contracts';
-import { executeReview, type FailMode } from '../../../application/review-service.js';
+import { executeReview, type FailMode } from '../../../application/review-service';
 
 export interface RunCommandArgs {
   diff: string;

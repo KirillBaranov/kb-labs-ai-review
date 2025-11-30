@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-import { resolveProfileRoot } from '../domain/profile.js';
+import { resolveProfileRoot } from '../domain/profile';
 
 export interface BuildContextOptions {
   profile: string;

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { renderMarkdown } from '@kb-labs/ai-review-core';
 import type { AiReviewRun, AiReviewArtifacts } from '@kb-labs/ai-review-contracts';
-import { toReviewFindings } from './findings.js';
+import { toReviewFindings } from './findings';
 
 async function ensureDirForFile(filePath: string) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });

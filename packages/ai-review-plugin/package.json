@@ -41,16 +41,16 @@
     "@kb-labs/ai-review-contracts": "workspace:*",
     "@kb-labs/ai-review-core": "workspace:*",
     "@kb-labs/ai-review-providers": "workspace:*",
-    "@kb-labs/cli-command-kit": "workspace:*",
+    "@kb-labs/core-sandbox": "workspace:*",
     "@kb-labs/plugin-manifest": "link:../../../kb-labs-plugin/packages/manifest",
-    "picomatch": "^4.0.3",
-    "zod": "^3.23.8"
+    "@kb-labs/shared-command-kit": "workspace:*",
+    "@kb-labs/shared-review-types": "workspace:*"
   },
   "devDependencies": {
     "@kb-labs/devkit": "link:../../../kb-labs-devkit",
-    "@types/node": "^20.16.10",
+    "@types/node": "^24.3.3",
     "rimraf": "^6.0.1",
-    "tsup": "^8.1.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.6.3",
     "vitest": "^3.2.4"
   },

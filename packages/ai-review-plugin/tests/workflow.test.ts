@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { runAiReviewWorkflow } from '../src/application/workflow.js';
+import { runAiReviewWorkflow } from '../src/application/workflow';
 
 const PROFILE = 'frontend';
 

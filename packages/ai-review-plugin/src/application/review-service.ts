@@ -7,10 +7,10 @@ import type { BoundariesConfig } from '@kb-labs/ai-review-core';
 import { localProvider, mockProvider, computeSummary } from '@kb-labs/ai-review-providers';
 import type { ReviewProvider } from '@kb-labs/ai-review-providers';
 
-import { buildContextDocument, type ContextBuildResult } from '../shared/context.js';
-import { loadRules, loadBoundaries } from '../domain/profile.js';
-import { writeReviewArtifacts } from '../domain/artifacts.js';
-import { toReviewFindings } from '../domain/findings.js';
+import { buildContextDocument, type ContextBuildResult } from '../shared/context';
+import { loadRules, loadBoundaries } from '../domain/profile';
+import { writeReviewArtifacts } from '../domain/artifacts';
+import { toReviewFindings } from '../domain/findings';
 
 export type FailMode = 'none' | 'major' | 'critical';
 

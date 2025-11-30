@@ -1,5 +1,5 @@
 import type { AiReviewCommandOutput } from '@kb-labs/ai-review-contracts';
-import { executeReview, type ReviewRuntimeOptions } from './review-service.js';
+import { executeReview, type ReviewRuntimeOptions } from './review-service';
 
 type AiReviewWorkflowOptions = ReviewRuntimeOptions;
 
