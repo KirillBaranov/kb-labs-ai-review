@@ -30,7 +30,7 @@
   "dependencies": {
     "@kb-labs/ai-review-contracts": "workspace:*",
     "@kb-labs/ai-review-core": "workspace:*",
-    "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/review-types"
+    "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/shared-review-types"
   },
   "devDependencies": {
     "@kb-labs/devkit": "link:../../../kb-labs-devkit",

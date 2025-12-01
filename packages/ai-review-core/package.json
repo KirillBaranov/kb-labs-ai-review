@@ -28,8 +28,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@kb-labs/shared-diff": "link:../../../kb-labs-shared/packages/diff",
-    "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/review-types",
+    "@kb-labs/shared-diff": "link:../../../kb-labs-shared/packages/shared-diff",
+    "@kb-labs/shared-review-types": "link:../../../kb-labs-shared/packages/shared-review-types",
     "@kb-labs/core-sys": "link:../../../kb-labs-core/packages/core-sys",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",

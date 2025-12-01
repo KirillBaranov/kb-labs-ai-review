@@ -34,10 +34,10 @@
         "../kb-labs-core/packages/core-sys/src/*"
       ],
       "@kb-labs/plugin-manifest": [
-        "../kb-labs-plugin/packages/manifest/src/index.ts"
+        "../kb-labs-plugin/packages/plugin-manifest/src/index.ts"
       ],
       "@kb-labs/plugin-manifest/*": [
-        "../kb-labs-plugin/packages/manifest/src/*"
+        "../kb-labs-plugin/packages/plugin-manifest/src/*"
       ],
       "@kb-labs/shared-command-kit": [
         "../kb-labs-shared/packages/shared-command-kit/src/index.ts"
@@ -46,16 +46,16 @@
         "../kb-labs-shared/packages/shared-command-kit/src/*"
       ],
       "@kb-labs/shared-diff": [
-        "../kb-labs-shared/packages/diff/src/index.ts"
+        "../kb-labs-shared/packages/shared-diff/src/index.ts"
       ],
       "@kb-labs/shared-diff/*": [
-        "../kb-labs-shared/packages/diff/src/*"
+        "../kb-labs-shared/packages/shared-diff/src/*"
       ],
       "@kb-labs/shared-review-types": [
-        "../kb-labs-shared/packages/review-types/src/index.ts"
+        "../kb-labs-shared/packages/shared-review-types/src/index.ts"
       ],
       "@kb-labs/shared-review-types/*": [
-        "../kb-labs-shared/packages/review-types/src/*"
+        "../kb-labs-shared/packages/shared-review-types/src/*"
       ]
     }
   }

@@ -11,7 +11,7 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./manifest": {
+    "./plugin-manifest": {
       "import": "./dist/manifest.v2.js",
       "types": "./dist/manifest.v2.d.ts"
     },
@@ -42,7 +42,7 @@
     "@kb-labs/ai-review-core": "workspace:*",
     "@kb-labs/ai-review-providers": "workspace:*",
     "@kb-labs/core-sandbox": "workspace:*",
-    "@kb-labs/plugin-manifest": "link:../../../kb-labs-plugin/packages/manifest",
+    "@kb-labs/plugin-manifest": "link:../../../kb-labs-plugin/packages/plugin-manifest",
     "@kb-labs/shared-command-kit": "workspace:*",
     "@kb-labs/shared-review-types": "workspace:*"
   },
