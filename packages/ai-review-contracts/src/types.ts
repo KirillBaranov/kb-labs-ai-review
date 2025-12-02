@@ -1,5 +1,7 @@
 // Re-export types for consistency with other contracts packages
 
+export const AI_REVIEW_PLUGIN_ID = 'ai-review' as const;
+
 export type ArtifactKind = 'file' | 'json' | 'markdown' | 'binary' | 'dir' | 'log' | 'text' | 'html';
 
 export interface ArtifactExample {
