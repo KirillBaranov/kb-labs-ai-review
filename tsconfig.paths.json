@@ -3,59 +3,41 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@kb-labs/ai-review-contracts": [
-        "packages/ai-review-contracts/src/index.ts"
+      "@kb-labs/review-contracts": [
+        "packages/review-contracts/src/index.ts"
       ],
-      "@kb-labs/ai-review-contracts/*": [
-        "packages/ai-review-contracts/src/*"
+      "@kb-labs/review-contracts/*": [
+        "packages/review-contracts/src/*"
       ],
-      "@kb-labs/ai-review-core": [
-        "packages/ai-review-core/src/index.ts"
+      "@kb-labs/review-core": [
+        "packages/review-core/src/index.ts"
       ],
-      "@kb-labs/ai-review-core/*": [
-        "packages/ai-review-core/src/*"
+      "@kb-labs/review-core/*": [
+        "packages/review-core/src/*"
       ],
-      "@kb-labs/ai-review-providers": [
-        "packages/ai-review-providers/src/index.ts"
+      "@kb-labs/review-heuristic": [
+        "packages/review-heuristic/src/index.ts"
       ],
-      "@kb-labs/ai-review-providers/*": [
-        "packages/ai-review-providers/src/*"
+      "@kb-labs/review-heuristic/*": [
+        "packages/review-heuristic/src/*"
       ],
-      "@kb-labs/core-sandbox": [
-        "../kb-labs-core/packages/core-sandbox/src/index.ts"
+      "@kb-labs/review-llm": [
+        "packages/review-llm/src/index.ts"
       ],
-      "@kb-labs/core-sandbox/*": [
-        "../kb-labs-core/packages/core-sandbox/src/*"
+      "@kb-labs/review-llm/*": [
+        "packages/review-llm/src/*"
       ],
-      "@kb-labs/core-sys": [
-        "../kb-labs-core/packages/core-sys/src/index.ts"
+      "@kb-labs/sdk": [
+        "../kb-labs-sdk/packages/sdk/src/index.ts"
       ],
-      "@kb-labs/core-sys/*": [
-        "../kb-labs-core/packages/core-sys/src/*"
+      "@kb-labs/sdk/*": [
+        "../kb-labs-sdk/packages/sdk/src/*"
       ],
-      "@kb-labs/plugin-manifest": [
-        "../kb-labs-plugin/packages/plugin-manifest/src/index.ts"
+      "@kb-labs/shared-cli-ui": [
+        "../kb-labs-shared/packages/shared-cli-ui/src/index.ts"
       ],
-      "@kb-labs/plugin-manifest/*": [
-        "../kb-labs-plugin/packages/plugin-manifest/src/*"
-      ],
-      "@kb-labs/shared-command-kit": [
-        "../kb-labs-shared/packages/shared-command-kit/src/index.ts"
-      ],
-      "@kb-labs/shared-command-kit/*": [
-        "../kb-labs-shared/packages/shared-command-kit/src/*"
-      ],
-      "@kb-labs/shared-diff": [
-        "../kb-labs-shared/packages/shared-diff/src/index.ts"
-      ],
-      "@kb-labs/shared-diff/*": [
-        "../kb-labs-shared/packages/shared-diff/src/*"
-      ],
-      "@kb-labs/shared-review-types": [
-        "../kb-labs-shared/packages/shared-review-types/src/index.ts"
-      ],
-      "@kb-labs/shared-review-types/*": [
-        "../kb-labs-shared/packages/shared-review-types/src/*"
+      "@kb-labs/shared-cli-ui/*": [
+        "../kb-labs-shared/packages/shared-cli-ui/src/*"
       ]
     }
   }

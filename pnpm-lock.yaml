@@ -19,7 +19,7 @@ importers:
         version: 8.46.2(eslint@9.38.0)(typescript@5.9.3)
       '@vitest/coverage-v8':
         specifier: ^3
-        version: 3.2.4(vitest@3.2.4(@types/node@20.19.24))
+        version: 3.2.4(vitest@3.2.4(@types/node@24.10.9))
       eslint:
         specifier: ^9
         version: 9.38.0
@@ -37,152 +37,137 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@20.19.24)
+        version: 3.2.4(@types/node@24.10.9)
 
-  packages/ai-review-contracts:
+  packages/review-cli:
     dependencies:
-      zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+      '@kb-labs/review-contracts':
+        specifier: workspace:*
+        version: link:../review-contracts
+      '@kb-labs/review-core':
+        specifier: workspace:*
+        version: link:../review-core
+      '@kb-labs/sdk':
+        specifier: link:../../../kb-labs-sdk/packages/sdk
+        version: link:../../../kb-labs-sdk/packages/sdk
+      '@kb-labs/shared-cli-ui':
+        specifier: link:../../../kb-labs-shared/packages/shared-cli-ui
+        version: link:../../../kb-labs-shared/packages/shared-cli-ui
+      chalk:
+        specifier: ^5.3.0
+        version: 5.6.2
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.24
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.1
+        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/review-contracts:
+    devDependencies:
+      '@kb-labs/devkit':
+        specifier: link:../../../kb-labs-devkit
+        version: link:../../../kb-labs-devkit
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.1
+        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/review-core:
+    dependencies:
+      '@kb-labs/review-contracts':
+        specifier: workspace:*
+        version: link:../review-contracts
+      '@kb-labs/review-heuristic':
+        specifier: workspace:*
+        version: link:../review-heuristic
+      '@kb-labs/review-llm':
+        specifier: workspace:*
+        version: link:../review-llm
+      '@kb-labs/sdk':
+        specifier: link:../../../kb-labs-sdk/packages/sdk
+        version: link:../../../kb-labs-sdk/packages/sdk
+      simple-git:
+        specifier: ^3.30.0
+        version: 3.30.0
     devDependencies:
       '@kb-labs/devkit':
         specifier: link:../../../kb-labs-devkit
         version: link:../../../kb-labs-devkit
       '@types/node':
-        specifier: ^20.16.10
+        specifier: ^20.11.0
         version: 20.19.24
-      eslint:
-        specifier: ^9.13.0
-        version: 9.38.0
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.1
+        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/review-heuristic:
+    dependencies:
+      '@kb-labs/review-contracts':
+        specifier: workspace:*
+        version: link:../review-contracts
+    devDependencies:
+      '@kb-labs/devkit':
+        specifier: link:../../../kb-labs-devkit
+        version: link:../../../kb-labs-devkit
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.24
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.1
+        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/review-llm:
+    dependencies:
+      '@kb-labs/review-contracts':
+        specifier: workspace:*
+        version: link:../review-contracts
+      '@kb-labs/sdk':
+        specifier: link:../../../kb-labs-sdk/packages/sdk
+        version: link:../../../kb-labs-sdk/packages/sdk
+    devDependencies:
+      '@kb-labs/devkit':
+        specifier: link:../../../kb-labs-devkit
+        version: link:../../../kb-labs-devkit
+      '@types/node':
+        specifier: ^24.3.3
+        version: 24.10.9
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
       tsup:
-        specifier: ^8.1.0
+        specifier: ^8.5.0
         version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@20.19.24)
-
-  packages/ai-review-core:
-    dependencies:
-      '@kb-labs/core-sys':
-        specifier: link:../../../kb-labs-core/packages/sys
-        version: link:../../../kb-labs-core/packages/sys
-      '@kb-labs/shared-diff':
-        specifier: link:../../../kb-labs-shared/packages/diff
-        version: link:../../../kb-labs-shared/packages/diff
-      '@kb-labs/shared-review-types':
-        specifier: link:../../../kb-labs-shared/packages/review-types
-        version: link:../../../kb-labs-shared/packages/review-types
-      ajv:
-        specifier: ^8.17.1
-        version: 8.17.1
-      ajv-formats:
-        specifier: ^3.0.1
-        version: 3.0.1(ajv@8.17.1)
-      picomatch:
-        specifier: ^4.0.2
-        version: 4.0.3
-      yaml:
-        specifier: ^2.8.0
-        version: 2.8.1
-    devDependencies:
-      '@kb-labs/devkit':
-        specifier: link:../../../kb-labs-devkit
-        version: link:../../../kb-labs-devkit
-      '@types/node':
-        specifier: ^20.16.10
-        version: 20.19.24
-      '@types/picomatch':
-        specifier: ^4.0.2
-        version: 4.0.2
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.0.1
-      tsup:
-        specifier: ^8.1.0
-        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
-      typescript:
-        specifier: ^5.6.3
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/node@20.19.24)
-
-  packages/ai-review-plugin:
-    dependencies:
-      '@kb-labs/ai-review-contracts':
-        specifier: workspace:*
-        version: link:../ai-review-contracts
-      '@kb-labs/ai-review-core':
-        specifier: workspace:*
-        version: link:../ai-review-core
-      '@kb-labs/ai-review-providers':
-        specifier: workspace:*
-        version: link:../ai-review-providers
-      '@kb-labs/plugin-manifest':
-        specifier: link:../../../kb-labs-plugin/packages/manifest
-        version: link:../../../kb-labs-plugin/packages/manifest
-      picomatch:
-        specifier: ^4.0.3
-        version: 4.0.3
-      zod:
-        specifier: ^3.23.8
-        version: 3.25.76
-    devDependencies:
-      '@kb-labs/devkit':
-        specifier: link:../../../kb-labs-devkit
-        version: link:../../../kb-labs-devkit
-      '@types/node':
-        specifier: ^20.16.10
-        version: 20.19.24
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.0.1
-      tsup:
-        specifier: ^8.1.0
-        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
-      typescript:
-        specifier: ^5.6.3
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/node@20.19.24)
-
-  packages/ai-review-providers:
-    dependencies:
-      '@kb-labs/ai-review-contracts':
-        specifier: workspace:*
-        version: link:../ai-review-contracts
-      '@kb-labs/ai-review-core':
-        specifier: workspace:*
-        version: link:../ai-review-core
-      '@kb-labs/shared-review-types':
-        specifier: link:../../../kb-labs-shared/packages/review-types
-        version: link:../../../kb-labs-shared/packages/review-types
-    devDependencies:
-      '@kb-labs/devkit':
-        specifier: link:../../../kb-labs-devkit
-        version: link:../../../kb-labs-devkit
-      '@types/node':
-        specifier: ^20.16.10
-        version: 20.19.24
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.0.1
-      tsup:
-        specifier: ^8.1.0
-        version: 8.5.0(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
-      typescript:
-        specifier: ^5.6.3
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/node@20.19.24)
+        version: 3.2.4(@types/node@24.10.9)
 
 packages:
 
@@ -588,6 +573,12 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@kwsites/file-exists@1.1.1':
+    resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
+
+  '@kwsites/promise-deferred@1.1.1':
+    resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -729,8 +720,8 @@ packages:
   '@types/node@20.19.24':
     resolution: {integrity: sha512-FE5u0ezmi6y9OZEzlJfg37mqqf6ZDSF2V/NLjUyGrR9uTZ7Sb9F7bLNZ03S4XVUNRWGA7Ck4c1kK+YnuWjl+DA==}
 
-  '@types/picomatch@4.0.2':
-    resolution: {integrity: sha512-qHHxQ+P9PysNEGbALT8f8YOSHW0KJu6l2xU8DYY0fu/EmGxXdVnuTLvFUvBgPJMSqXq29SYHveejeAha+4AYgA==}
+  '@types/node@24.10.9':
+    resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
 
   '@typescript-eslint/eslint-plugin@8.46.2':
     resolution: {integrity: sha512-ZGBMToy857/NIPaaCucIUQgqueOiq7HeAKkhlvqVV4lm089zUFW6ikRySx2v+cAhKeUCPuWVHeimyk6Dw1iY3w==}
@@ -839,19 +830,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  ajv-formats@3.0.1:
-    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
-    peerDependencies:
-      ajv: ^8.0.0
-    peerDependenciesMeta:
-      ajv:
-        optional: true
-
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
-
-  ajv@8.17.1:
-    resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -916,6 +896,10 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
+
+  chalk@5.6.2:
+    resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
@@ -1053,9 +1037,6 @@ packages:
 
   fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
-
-  fast-uri@3.1.0:
-    resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -1208,9 +1189,6 @@ packages:
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
-
-  json-schema-traverse@1.0.0:
-    resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
@@ -1409,10 +1387,6 @@ packages:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
 
-  require-from-string@2.0.2:
-    resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
-    engines: {node: '>=0.10.0'}
-
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
@@ -1427,6 +1401,10 @@ packages:
   reusify@1.1.0:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
+
+  rimraf@5.0.10:
+    resolution: {integrity: sha512-l0OE8wL34P4nJH/H2ffoaniAokM2qSmrtXHmlpvYr5AVVX8msAyW0l8NVJFDxlSK4u3Uh/f41cQheDVdnYijwQ==}
+    hasBin: true
 
   rimraf@6.0.1:
     resolution: {integrity: sha512-9dkvaxAsk/xNXSJzMgFqqMCuFgt2+KsOFek3TMLfo8NCPfWpBmqwyNn5Y+NX56QUYfCtsyhF3ayiboEoUmJk/A==}
@@ -1460,6 +1438,9 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
+
+  simple-git@3.30.0:
+    resolution: {integrity: sha512-q6lxyDsCmEal/MEGhP1aVyQ3oxnagGlBDOVSIB4XUVLl1iZh0Pah6ebC9V4xBap/RfgP2WlI8EKs0WS0rMEJHg==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -1600,6 +1581,9 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
+  undici-types@7.16.0:
+    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -1703,9 +1687,6 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
-
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -1964,6 +1945,14 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@kwsites/file-exists@1.1.1':
+    dependencies:
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@kwsites/promise-deferred@1.1.1': {}
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -2060,7 +2049,9 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/picomatch@4.0.2': {}
+  '@types/node@24.10.9':
+    dependencies:
+      undici-types: 7.16.0
 
   '@typescript-eslint/eslint-plugin@8.46.2(@typescript-eslint/parser@8.46.2(eslint@9.38.0)(typescript@5.9.3))(eslint@9.38.0)(typescript@5.9.3)':
     dependencies:
@@ -2155,7 +2146,7 @@ snapshots:
       '@typescript-eslint/types': 8.46.2
       eslint-visitor-keys: 4.2.1
 
-  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/node@20.19.24))':
+  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/node@24.10.9))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -2170,7 +2161,7 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@20.19.24)
+      vitest: 3.2.4(@types/node@24.10.9)
     transitivePeerDependencies:
       - supports-color
 
@@ -2182,13 +2173,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.4(vite@5.4.21(@types/node@20.19.24))':
+  '@vitest/mocker@3.2.4(vite@5.4.21(@types/node@24.10.9))':
     dependencies:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 5.4.21(@types/node@20.19.24)
+      vite: 5.4.21(@types/node@24.10.9)
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -2222,23 +2213,12 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  ajv-formats@3.0.1(ajv@8.17.1):
-    optionalDependencies:
-      ajv: 8.17.1
-
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
       fast-json-stable-stringify: 2.1.0
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
-
-  ajv@8.17.1:
-    dependencies:
-      fast-deep-equal: 3.1.3
-      fast-uri: 3.1.0
-      json-schema-traverse: 1.0.0
-      require-from-string: 2.0.2
 
   ansi-regex@5.0.1: {}
 
@@ -2298,6 +2278,8 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
+
+  chalk@5.6.2: {}
 
   check-error@2.1.1: {}
 
@@ -2484,8 +2466,6 @@ snapshots:
 
   fast-levenshtein@2.0.6: {}
 
-  fast-uri@3.1.0: {}
-
   fastq@1.19.1:
     dependencies:
       reusify: 1.1.0
@@ -2632,8 +2612,6 @@ snapshots:
   json-buffer@3.0.1: {}
 
   json-schema-traverse@0.4.1: {}
-
-  json-schema-traverse@1.0.0: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
@@ -2801,8 +2779,6 @@ snapshots:
 
   readdirp@4.1.2: {}
 
-  require-from-string@2.0.2: {}
-
   resolve-from@4.0.0: {}
 
   resolve-from@5.0.0: {}
@@ -2811,6 +2787,10 @@ snapshots:
     optional: true
 
   reusify@1.1.0: {}
+
+  rimraf@5.0.10:
+    dependencies:
+      glob: 10.4.5
 
   rimraf@6.0.1:
     dependencies:
@@ -2860,6 +2840,14 @@ snapshots:
   siginfo@2.0.0: {}
 
   signal-exit@4.1.0: {}
+
+  simple-git@3.30.0:
+    dependencies:
+      '@kwsites/file-exists': 1.1.1
+      '@kwsites/promise-deferred': 1.1.1
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
 
   source-map-js@1.2.1: {}
 
@@ -3002,17 +2990,19 @@ snapshots:
 
   undici-types@6.21.0: {}
 
+  undici-types@7.16.0: {}
+
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
 
-  vite-node@3.2.4(@types/node@20.19.24):
+  vite-node@3.2.4(@types/node@24.10.9):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 5.4.21(@types/node@20.19.24)
+      vite: 5.4.21(@types/node@24.10.9)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3024,20 +3014,20 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.21(@types/node@20.19.24):
+  vite@5.4.21(@types/node@24.10.9):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.6
       rollup: 4.52.5
     optionalDependencies:
-      '@types/node': 20.19.24
+      '@types/node': 24.10.9
       fsevents: 2.3.3
 
-  vitest@3.2.4(@types/node@20.19.24):
+  vitest@3.2.4(@types/node@24.10.9):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(vite@5.4.21(@types/node@20.19.24))
+      '@vitest/mocker': 3.2.4(vite@5.4.21(@types/node@24.10.9))
       '@vitest/pretty-format': 3.2.4
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -3055,11 +3045,11 @@ snapshots:
       tinyglobby: 0.2.15
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 5.4.21(@types/node@20.19.24)
-      vite-node: 3.2.4(@types/node@20.19.24)
+      vite: 5.4.21(@types/node@24.10.9)
+      vite-node: 3.2.4(@types/node@24.10.9)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 20.19.24
+      '@types/node': 24.10.9
     transitivePeerDependencies:
       - less
       - lightningcss
@@ -3102,8 +3092,7 @@ snapshots:
       string-width: 5.1.2
       strip-ansi: 7.1.2
 
-  yaml@2.8.1: {}
+  yaml@2.8.1:
+    optional: true
 
   yocto-queue@0.1.0: {}
-
-  zod@3.25.76: {}
