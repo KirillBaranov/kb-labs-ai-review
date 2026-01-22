@@ -1,0 +1,28 @@
+{
+  "name": "@kb-labs/review-contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Type definitions and contracts for AI Review plugin",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5"
+  }
+}
