@@ -1,0 +1,32 @@
+{
+  "name": "@kb-labs/review-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "kb": {
+    "manifest": "./dist/manifest.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@kb-labs/review-contracts": "workspace:*",
+    "@kb-labs/review-core": "workspace:*",
+    "@kb-labs/sdk": "link:../../../kb-labs-sdk/packages/sdk",
+    "@kb-labs/shared-cli-ui": "link:../../../kb-labs-shared/packages/shared-cli-ui",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5"
+  }
+}
