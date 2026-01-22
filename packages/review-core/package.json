@@ -1,0 +1,30 @@
+{
+  "name": "@kb-labs/review-core",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@kb-labs/review-contracts": "workspace:*",
+    "@kb-labs/review-heuristic": "workspace:*",
+    "@kb-labs/review-llm": "workspace:*",
+    "@kb-labs/sdk": "link:../../../kb-labs-sdk/packages/sdk",
+    "simple-git": "^3.30.0"
+  },
+  "devDependencies": {
+    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@types/node": "^20.11.0",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}
