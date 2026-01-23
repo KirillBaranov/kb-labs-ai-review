@@ -76,6 +76,7 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
 
     try {
       const git: SimpleGit = simpleGit(gitCwd);
+      // eslint-disable-next-line no-await-in-loop -- Sequential per-repo processing is intentional
       const status: StatusResult = await git.status();
 
       // Collect file paths based on options
@@ -110,6 +111,7 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
       for (const filePath of uniquePaths) {
         try {
           const absolutePath = join(gitCwd, filePath);
+          // eslint-disable-next-line no-await-in-loop -- Sequential file reading for memory efficiency
           const content = await readFile(absolutePath, 'utf-8');
 
           // Path relative to root cwd
@@ -189,6 +191,7 @@ export async function getReposWithChanges(cwd: string): Promise<string[]> {
 
     try {
       const git: SimpleGit = simpleGit(repoPath);
+      // eslint-disable-next-line no-await-in-loop -- Sequential per-repo processing is intentional
       const status: StatusResult = await git.status();
 
       const hasChanges =

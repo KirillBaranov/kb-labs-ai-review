@@ -157,7 +157,9 @@ export class FindingsCache {
    * Save cache to disk
    */
   async save(): Promise<void> {
-    if (!this.data) return;
+    if (!this.data) {
+      return;
+    }
 
     this.data.metadata.lastUpdatedAt = Date.now();
 
@@ -306,7 +308,9 @@ export class FindingsCache {
    * Clear cache for specific files or all
    */
   clear(files?: string[]): void {
-    if (!this.data) return;
+    if (!this.data) {
+      return;
+    }
 
     if (files) {
       for (const file of files) {

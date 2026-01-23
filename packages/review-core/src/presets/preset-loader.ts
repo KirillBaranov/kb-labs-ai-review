@@ -10,7 +10,7 @@ import { useConfig, useLogger } from '@kb-labs/sdk';
 /**
  * Deep merge two objects
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
   const result = { ...target } as T;
 
@@ -18,7 +18,9 @@ function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>)
     const sourceValue = source[key];
     const targetValue = result[key];
 
-    if (sourceValue === undefined) continue;
+    if (sourceValue === undefined) {
+      continue;
+    }
 
     if (
       typeof sourceValue === 'object' &&
@@ -114,6 +116,7 @@ export class PresetLoader {
     }
 
     try {
+      // 1. Load presets from kb.config.json
       const config = await useConfig<ReviewConfig>();
 
       if (config?.presets) {
@@ -121,6 +124,7 @@ export class PresetLoader {
         for (const presetOrPath of config.presets) {
           if (typeof presetOrPath === 'string') {
             // It's a file path - load preset from file
+            // eslint-disable-next-line no-await-in-loop -- Sequential preset loading maintains order
             await this.loadPresetFromFile(presetOrPath);
           } else {
             // It's an inline preset definition
@@ -128,10 +132,61 @@ export class PresetLoader {
           }
         }
       }
+
+      // 2. Auto-scan .kb/ai-review/presets/ directory
+      await this.scanPresetsDirectory();
+
       this.configLoaded = true;
-    } catch (error) {
+    } catch {
       // Silently fail if config not available
       this.configLoaded = true;
+    }
+  }
+
+  /**
+   * Auto-scan .kb/ai-review/presets/ directory for preset files
+   */
+  private async scanPresetsDirectory(): Promise<void> {
+    try {
+      const fs = await import('fs/promises');
+      const pathModule = await import('path');
+
+      const presetsDir = pathModule.join(process.cwd(), '.kb', 'ai-review', 'presets');
+
+      // Check if directory exists
+      try {
+        await fs.access(presetsDir);
+      } catch {
+        // Directory doesn't exist, skip
+        return;
+      }
+
+      // Read all JSON files
+      const entries = await fs.readdir(presetsDir, { withFileTypes: true });
+      const jsonFiles = entries.filter(e => e.isFile() && e.name.endsWith('.json'));
+
+      for (const file of jsonFiles) {
+        // Path traversal protection
+        if (file.name.includes('..') || file.name.includes(pathModule.sep)) {
+          continue;
+        }
+
+        const filePath = pathModule.join(presetsDir, file.name);
+
+        try {
+          // eslint-disable-next-line no-await-in-loop -- Sequential file reading for preset loading
+          const content = await fs.readFile(filePath, 'utf-8');
+          const preset = JSON.parse(content) as PresetDefinition;
+
+          if (preset.id) {
+            this.presets.set(preset.id, preset);
+          }
+        } catch {
+          // Skip invalid files
+        }
+      }
+    } catch {
+      // Directory scan failed, continue without custom presets
     }
   }
 
@@ -195,6 +250,7 @@ export class PresetLoader {
         continue;
       }
 
+      // eslint-disable-next-line no-await-in-loop -- Sequential rule loading preserves order
       const ruleContent = await this.loadAtomicRule(category, ruleName);
       if (ruleContent) {
         rules.push(ruleContent);
@@ -230,6 +286,7 @@ export class PresetLoader {
         continue;
       }
 
+      // eslint-disable-next-line no-await-in-loop -- Sequential category processing
       const composedRules = await this.composeRules(
         category,
         ruleConfig.include,

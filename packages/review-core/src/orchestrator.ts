@@ -12,9 +12,9 @@ import type {
   PresetDefinition,
   IncrementalMetadata,
 } from '@kb-labs/review-contracts';
-import { analyzeWithESLint, deduplicateFindings } from '@kb-labs/review-heuristic';
+import { LinterRunner, deduplicateFindings } from '@kb-labs/review-heuristic';
 import { runLLMLiteAnalysis, type LLMLiteResult } from '@kb-labs/review-llm';
-import { useLLM, useCache, useAnalytics } from '@kb-labs/sdk';
+import { useLLM, useAnalytics, useLogger } from '@kb-labs/sdk';
 import { loadPreset } from './presets/index.js';
 import { createDiffProvider } from './diff-provider.js';
 import {
@@ -191,24 +191,33 @@ export class ReviewOrchestrator {
   /**
    * Run heuristic-only analysis (CI mode).
    *
-   * Fast, deterministic analysis using linters and SAST.
+   * Fast, deterministic analysis using linters via CLI.
    * No LLM calls.
    */
   private async runHeuristicAnalysis(
     request: ReviewRequest,
-    preset: PresetDefinition
+    _preset: PresetDefinition
   ): Promise<ReviewFinding[]> {
-    const findings: ReviewFinding[] = [];
-
-    // Run ESLint for TypeScript/JavaScript
-    if (this.shouldRunESLint(request, preset)) {
-      const eslintFindings = await this.runESLint(request, preset);
-      findings.push(...eslintFindings);
+    // Get file paths
+    const files = request.files?.map(f => f.path) ?? [];
+    if (files.length === 0) {
+      return [];
     }
 
-    // TODO: Add more engines (Ruff, golangci, Clippy, etc.)
+    // Run all applicable linters via CLI
+    const runner = new LinterRunner();
+    const results = await runner.runAll(files);
 
-    // Deduplicate
+    // Log any errors
+    const logger = useLogger();
+    for (const result of results) {
+      if (result.error) {
+        logger?.warn(`[${result.engineId}] ${result.error}`);
+      }
+    }
+
+    // Collect and deduplicate findings
+    const findings = LinterRunner.collectFindings(results);
     return deduplicateFindings(findings);
   }
 
@@ -322,56 +331,6 @@ export class ReviewOrchestrator {
     ];
 
     return deduplicateFindings(allFindings);
-  }
-
-  /**
-   * Run ESLint analysis.
-   */
-  private async runESLint(request: ReviewRequest, preset: PresetDefinition): Promise<ReviewFinding[]> {
-    // Check cache first
-    const cache = useCache();
-    const cacheKey = this.generateCacheKey('eslint', request);
-
-    if (cache) {
-      const cached = await cache.get<ReviewFinding[]>(cacheKey);
-      if (cached) {
-        return cached;
-      }
-    }
-
-    // Resolve file patterns from preset or request
-    const patterns = await this.resolvePatterns(request, preset);
-
-    // Get ESLint config from preset (inline config takes precedence)
-    const inlineConfig = preset.engines?.eslint?.config;
-
-    // Run ESLint
-    const findings = await analyzeWithESLint(
-      patterns.filter((p) => p.endsWith('.ts') || p.endsWith('.tsx') || p.endsWith('.js') || p.endsWith('.jsx')),
-      request.cwd ?? process.cwd(),
-      request.config?.eslintConfig, // External config file (optional)
-      inlineConfig // Preset config (takes precedence if present)
-    );
-
-    // Cache results
-    if (cache) {
-      await cache.set(cacheKey, findings, 3600); // 1 hour TTL in seconds
-    }
-
-    return findings;
-  }
-
-  /**
-   * Should run ESLint for this request?
-   */
-  private shouldRunESLint(request: ReviewRequest, preset: PresetDefinition): boolean {
-    // Check if ESLint is enabled in preset
-    if (preset.engines?.eslint?.enabled === false) {
-      return false;
-    }
-
-    // Always run ESLint for TypeScript/JavaScript projects
-    return true;
   }
 
   /**
