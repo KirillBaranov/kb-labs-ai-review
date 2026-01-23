@@ -2,15 +2,13 @@
  * @module @kb-labs/review-heuristic
  * Heuristic analysis engines for AI Review plugin.
  *
- * Provides adapters for deterministic code analysis tools:
+ * Provides CLI-based linter integration:
  * - ESLint (TypeScript/JavaScript)
  * - Ruff (Python)
- * - golangci-lint (Go)
- * - Clippy (Rust)
- * - etc.
+ * - More coming: golangci-lint (Go), Clippy (Rust), etc.
  */
 
-// Engine registry
+// Engine registry (for deduplication priorities)
 export {
   ENGINE_REGISTRY,
   getEngine,
@@ -26,9 +24,21 @@ export {
   deduplicateFindingsWithSnippets,
 } from './deduplication.js';
 
-// ESLint adapter
+// Linter engines (CLI-based)
 export {
-  ESLintAdapter,
-  analyzeWithESLint,
-  type ESLintAdapterConfig,
-} from './adapters/eslint-adapter.js';
+  type LinterEngine,
+  type LinterResult,
+  eslintEngine,
+  ruffEngine,
+  LINTER_ENGINES,
+  getLinterEngine,
+  getLinterEngineForFile,
+} from './engines/index.js';
+
+// Linter runner
+export {
+  LinterRunner,
+  type LinterRunnerConfig,
+  runLinters,
+  runLinter,
+} from './runner.js';

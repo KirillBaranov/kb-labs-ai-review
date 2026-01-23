@@ -144,6 +144,7 @@ export async function deduplicateFindingsWithSnippets(
   const fingerprintMap = new Map<string, ReviewFinding[]>();
 
   for (const finding of findings) {
+    // eslint-disable-next-line no-await-in-loop -- Sequential snippet fetching for fingerprinting
     const snippet = await getSnippet(finding);
     const snippetHash = hashSnippet(snippet);
     const fingerprint = generateFingerprint(finding, snippetHash);
