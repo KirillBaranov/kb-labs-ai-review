@@ -47,8 +47,8 @@ const ARCHITECTURE_FINDING_TOOL = {
  * Valid severity values for ReviewFinding.
  * Maps to ReviewFinding['severity'] from @kb-labs/review-contracts.
  */
-const VALID_SEVERITIES = ['blocker', 'high', 'medium', 'low', 'info'] as const;
-type ValidSeverity = (typeof VALID_SEVERITIES)[number];
+const _VALID_SEVERITIES = ['blocker', 'high', 'medium', 'low', 'info'] as const;
+type ValidSeverity = (typeof _VALID_SEVERITIES)[number];
 
 /**
  * Map LLM severity output to internal ReviewFinding severity.
@@ -82,6 +82,7 @@ export class ArchitectureAnalyzer extends BaseLLMAnalyzer {
       const cacheKey = this.generateCacheKey(file, context.preset);
 
       if (cache) {
+        // eslint-disable-next-line no-await-in-loop -- Sequential file analysis with caching
         const cached = await cache.get<ReviewFinding[]>(cacheKey);
         if (cached) {
           findings.push(...cached);
@@ -100,6 +101,7 @@ export class ArchitectureAnalyzer extends BaseLLMAnalyzer {
       }
 
       try {
+        // eslint-disable-next-line no-await-in-loop -- Sequential LLM calls per file (rate limiting)
         const response = await llm.chatWithTools(
           [
             { role: 'system', content: systemPrompt },
@@ -119,6 +121,7 @@ export class ArchitectureAnalyzer extends BaseLLMAnalyzer {
 
         // Track analytics (useful for monitoring)
         if (analytics && response.usage) {
+          // eslint-disable-next-line no-await-in-loop -- Analytics tracking after each file
           await analytics.track('review.architecture.complete', {
             file: file.path,
             tokensUsed: (response.usage.promptTokens ?? 0) + (response.usage.completionTokens ?? 0),
@@ -132,6 +135,7 @@ export class ArchitectureAnalyzer extends BaseLLMAnalyzer {
 
         // Cache results (24 hours)
         if (cache) {
+          // eslint-disable-next-line no-await-in-loop -- Cache storage after analysis
           await cache.set(cacheKey, fileFindings, 86400000);
         }
       } catch (error) {
@@ -154,13 +158,13 @@ export class ArchitectureAnalyzer extends BaseLLMAnalyzer {
   /**
    * Process LLM tool calls into ReviewFindings
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private processToolCalls(toolCalls: any[], file: ParsedFile): ReviewFinding[] {
     const findings: ReviewFinding[] = [];
 
     for (const call of toolCalls) {
       if (call.name === 'report_architecture_finding') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const args = call.input as any;
 
         // Validate line number

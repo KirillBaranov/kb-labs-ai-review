@@ -5,21 +5,10 @@
  * Categories are NOT hardcoded - they come from .kb/ai-review/rules/ subdirectories.
  */
 
+import type { ReviewConfig } from '@kb-labs/review-contracts';
 import { useConfig } from '@kb-labs/sdk';
 import { readdir, access } from 'node:fs/promises';
 import * as path from 'node:path';
-
-/**
- * Review config from kb.config.json
- */
-export interface ReviewConfig {
-  /** Rules directory (relative to .kb/) */
-  rulesDir?: string;
-  /** Presets directory (relative to .kb/) */
-  presetsDir?: string;
-  /** Default preset ID */
-  defaultPreset?: string;
-}
 
 /**
  * Common aliases for category names
@@ -54,7 +43,9 @@ export class CategoryValidator {
    * @param cwd - Project root directory (ctx.cwd from command handler)
    */
   async init(cwd: string): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {
+      return;
+    }
 
     this.validCategories = await discoverCategories(cwd);
 

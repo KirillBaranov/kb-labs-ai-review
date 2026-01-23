@@ -65,6 +65,7 @@ export class NamingAnalyzer extends BaseLLMAnalyzer {
       const cacheKey = this.generateCacheKey(file, context.preset);
 
       if (cache) {
+        // eslint-disable-next-line no-await-in-loop -- Sequential file analysis with caching
         const cached = await cache.get<ReviewFinding[]>(cacheKey);
         if (cached) {
           findings.push(...cached);
@@ -83,6 +84,7 @@ export class NamingAnalyzer extends BaseLLMAnalyzer {
       }
 
       try {
+        // eslint-disable-next-line no-await-in-loop -- Sequential LLM calls per file (rate limiting)
         const response = await llm.chatWithTools(
           [
             { role: 'system', content: systemPrompt },
@@ -96,6 +98,7 @@ export class NamingAnalyzer extends BaseLLMAnalyzer {
 
         // Track analytics
         if (analytics) {
+          // eslint-disable-next-line no-await-in-loop -- Analytics tracking after each file
           await analytics.track('review.naming.complete', {
             file: file.path,
             tokensUsed: response.usage.promptTokens + response.usage.completionTokens,
@@ -109,6 +112,7 @@ export class NamingAnalyzer extends BaseLLMAnalyzer {
 
         // Cache results (24 hours)
         if (cache) {
+          // eslint-disable-next-line no-await-in-loop -- Cache storage after analysis
           await cache.set(cacheKey, fileFindings, 86400000);
         }
       } catch (error) {
@@ -123,13 +127,13 @@ export class NamingAnalyzer extends BaseLLMAnalyzer {
   /**
    * Process LLM tool calls into ReviewFindings
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private processToolCalls(toolCalls: any[], file: ParsedFile): ReviewFinding[] {
     const findings: ReviewFinding[] = [];
 
     for (const call of toolCalls) {
       if (call.name === 'report_naming_finding') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const args = call.input as any;
 
         // Validate line number

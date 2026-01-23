@@ -28,5 +28,10 @@ export {
   discoverCategories,
   buildCategoryAliases,
   resetCategoryValidator,
-  type ReviewConfig,
 } from './category-validator.js';
+// ReviewConfig is now exported from @kb-labs/review-contracts
+export {
+  loadPrompts,
+  type LoadedPrompts,
+  type RuleContent,
+} from './prompt-loader.js';

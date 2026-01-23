@@ -62,7 +62,7 @@ const BATCH_SIZE = 5;
  * Sleep helper for retry delays
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => { setTimeout(resolve, ms); });
 }
 
 /**
@@ -88,6 +88,7 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
       const cacheKey = this.generateCacheKey(file, context.preset);
 
       if (cache) {
+        // eslint-disable-next-line no-await-in-loop -- Sequential cache check before batching
         const cached = await cache.get<ReviewFinding[]>(cacheKey);
         if (cached) {
           findings.push(...cached);
@@ -103,6 +104,7 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
       const batch = filesToAnalyze.slice(i, i + BATCH_SIZE);
 
       // Process batch in parallel
+      // eslint-disable-next-line no-await-in-loop -- Intentional batching to limit concurrency
       const batchResults = await Promise.allSettled(
         batch.map(file => this.analyzeFile(file, context, cache))
       );
@@ -151,6 +153,7 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
     let lastError: Error | null = null;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
+        // eslint-disable-next-line no-await-in-loop -- Retry loop requires sequential attempts
         const response = await llm.chatWithTools(
           [
             { role: 'system', content: systemPrompt },
@@ -164,6 +167,7 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
 
         // Track analytics
         if (analytics) {
+          // eslint-disable-next-line no-await-in-loop -- Analytics tracking in retry loop
           await analytics.track('review.security.complete', {
             file: file.path,
             tokensUsed: response.usage.promptTokens + response.usage.completionTokens,
@@ -178,6 +182,7 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
         // Cache results (24 hours)
         if (cache) {
           const cacheKey = this.generateCacheKey(file, context.preset);
+          // eslint-disable-next-line no-await-in-loop -- Cache storage in retry loop
           await cache.set(cacheKey, fileFindings, 86400000);
         }
 
@@ -188,6 +193,7 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
 
         if (attempt < MAX_RETRIES) {
           const delay = INITIAL_DELAY_MS * Math.pow(2, attempt - 1);
+          // eslint-disable-next-line no-await-in-loop -- Intentional delay between retry attempts
           await sleep(delay);
         }
       }
@@ -206,13 +212,13 @@ export class SecurityAnalyzer extends BaseLLMAnalyzer {
   /**
    * Process LLM tool calls into ReviewFindings
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private processToolCalls(toolCalls: any[], file: ParsedFile): ReviewFinding[] {
     const findings: ReviewFinding[] = [];
 
     for (const call of toolCalls) {
       if (call.name === 'report_security_finding') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const args = call.input as any;
 
         // Validate line number

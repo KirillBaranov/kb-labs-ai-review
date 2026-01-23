@@ -38,5 +38,5 @@ export {
   getCategoryValidator,
   discoverCategories,
   buildCategoryAliases,
-  type ReviewConfig,
+  // ReviewConfig is now exported from @kb-labs/review-contracts
 } from './llm-lite/index.js';

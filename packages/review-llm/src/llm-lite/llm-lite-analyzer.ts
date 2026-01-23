@@ -5,8 +5,8 @@
  * Uses batch tools, diff-based context, and anti-hallucination verification.
  */
 
-import type { ReviewFinding, InputFile, IDiffProvider } from '@kb-labs/review-contracts';
-import { useLLM, useAnalytics } from '@kb-labs/sdk';
+import type { ReviewFinding, InputFile, IDiffProvider, ReviewConfig } from '@kb-labs/review-contracts';
+import { useLLM, useAnalytics, useConfig } from '@kb-labs/sdk';
 import {
   createToolExecutor,
   buildToolDefinitions,
@@ -15,6 +15,12 @@ import {
 } from './tool-executor.js';
 import { createVerificationEngine, type VerificationResult } from './verification.js';
 import { getCategoryValidator } from './category-validator.js';
+import { loadPrompts, type LoadedPrompts } from './prompt-loader.js';
+
+/**
+ * Review LLM config from kb.config.json
+ */
+type ReviewLLMConfig = NonNullable<ReviewConfig['llm']>;
 
 /**
  * LLM-Lite review request
@@ -84,25 +90,38 @@ interface FileSummary {
 }
 
 /**
- * Turn limits
+ * Default turn limits (can be overridden via kb.config.json)
  */
-const MIN_TURNS = 3;
-const MAX_TURNS = 10;
+const DEFAULT_MIN_TURNS = 3;
+const DEFAULT_MAX_TURNS = 25;
+const DEFAULT_FILES_PER_TURN = 10;
+const DEFAULT_LINES_PER_TURN = 500;
 
 /**
  * Calculate adaptive turn limit based on workload
  *
  * Formula:
- * - Base: 3 turns (get_diffs + analyze + report)
- * - +1 turn per 10 files (more files = more get_diffs calls needed)
- * - +1 turn per 500 lines changed (more changes = more context needed)
- * - Capped at 10 turns (cost control)
+ * - Base: minTurns (get_diffs + analyze + report)
+ * - +1 turn per filesPerTurn files (more files = more get_diffs calls needed)
+ * - +1 turn per linesPerTurn lines changed (more changes = more context needed)
+ * - Capped at maxTurns (cost control)
+ *
+ * All parameters configurable via kb.config.json review.llm section
  */
-function calculateMaxTurns(fileCount: number, totalChangedLines: number): number {
-  const baseTurns = MIN_TURNS;
-  const turnsForFiles = Math.ceil(fileCount / 10);
-  const turnsForLines = Math.ceil(totalChangedLines / 500);
-  return Math.min(MAX_TURNS, baseTurns + turnsForFiles + turnsForLines);
+function calculateMaxTurns(
+  fileCount: number,
+  totalChangedLines: number,
+  config?: ReviewLLMConfig
+): number {
+  const minTurns = config?.minTurns ?? DEFAULT_MIN_TURNS;
+  const maxTurns = config?.maxTurns ?? DEFAULT_MAX_TURNS;
+  const filesPerTurn = config?.filesPerTurn ?? DEFAULT_FILES_PER_TURN;
+  const linesPerTurn = config?.linesPerTurn ?? DEFAULT_LINES_PER_TURN;
+
+  const baseTurns = minTurns;
+  const turnsForFiles = Math.ceil(fileCount / filesPerTurn);
+  const turnsForLines = Math.ceil(totalChangedLines / linesPerTurn);
+  return Math.min(maxTurns, baseTurns + turnsForFiles + turnsForLines);
 }
 
 /**
@@ -156,6 +175,13 @@ export class LLMLiteAnalyzer {
       throw new Error('LLM not available for llm-lite mode');
     }
 
+    // Get review config from kb.config.json
+    const reviewConfig = await useConfig<ReviewConfig>('review');
+    const llmConfig = reviewConfig?.llm;
+
+    // Load prompts and rules from .kb/ai-review/
+    const prompts = await loadPrompts(this.cwd);
+
     // Get category validator
     const categoryValidator = await getCategoryValidator(this.cwd);
     const validCategories = categoryValidator.getValidCategories();
@@ -164,26 +190,28 @@ export class LLMLiteAnalyzer {
     // Build file summaries for initial prompt
     const fileSummaries = this.buildFileSummaries();
 
-    // Calculate adaptive turn limit based on workload
+    // Calculate adaptive turn limit based on workload and config
     const totalChangedLines = fileSummaries.reduce(
       (sum, f) => sum + f.additions + f.deletions,
       0
     );
-    const maxTurns = calculateMaxTurns(this.files.length, totalChangedLines);
+    const maxTurns = calculateMaxTurns(this.files.length, totalChangedLines, llmConfig);
 
     // Create tool executor
     const changedFiles = this.files.map(f => f.path);
     const toolExecutor = createToolExecutor(this.cwd, changedFiles, this.diffProvider);
 
-    // Build tools with dynamic categories
-    const tools = buildToolDefinitions(validCategories);
+    // Build tools with dynamic categories and rule IDs
+    const validRuleIds = Array.from(prompts.ruleIds);
+    const tools = buildToolDefinitions(validCategories, validRuleIds);
 
-    // Build initial prompt
-    const systemPrompt = this.buildSystemPrompt(validCategories);
-    const initialPrompt = this.buildInitialPrompt(fileSummaries);
+    // Build prompts with loaded rules
+    const systemPrompt = this.buildSystemPrompt(validCategories, prompts);
+    const initialPrompt = this.buildInitialPrompt(fileSummaries, prompts);
 
     // Conversation loop
-    // Note: Using 'user' role for tool results to avoid Anthropic tool_use/tool_result format issues
+    // Messages array uses 'user' for initial prompt and tool results, 'assistant' for LLM responses.
+    // Tool results are sent as 'user' messages to avoid Anthropic tool_use/tool_result format issues.
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
       { role: 'user', content: initialPrompt },
     ];
@@ -211,6 +239,7 @@ export class LLMLiteAnalyzer {
         : tools;
 
       // Call LLM with tools
+      // eslint-disable-next-line no-await-in-loop -- Conversation loop requires sequential turns
       const response = await llm.chatWithTools!(
         [
           { role: 'system', content: systemPrompt },
@@ -229,6 +258,7 @@ export class LLMLiteAnalyzer {
       llmTimeMs += Date.now() - llmStart;
 
       // Track token usage (if available)
+      // Note: Some adapters may not provide usage data, cost estimation will be incomplete
       if (response.usage) {
         totalInputTokens += response.usage.promptTokens ?? 0;
         totalOutputTokens += response.usage.completionTokens ?? 0;
@@ -242,11 +272,15 @@ export class LLMLiteAnalyzer {
         break;
       }
 
-      // Add assistant message
-      messages.push({
-        role: 'assistant',
-        content: response.content ?? '',
-      });
+      // Add assistant message only if there's actual content
+      // Skip empty content even with tool calls - VibeProxy requires non-empty content
+      const assistantContent = response.content ?? '';
+      if (assistantContent.trim()) {
+        messages.push({
+          role: 'assistant',
+          content: assistantContent,
+        });
+      }
 
       // Execute tool calls
       for (const toolCall of toolCalls) {
@@ -261,6 +295,7 @@ export class LLMLiteAnalyzer {
         }
 
         // Execute
+        // eslint-disable-next-line no-await-in-loop -- Sequential tool execution for conversation flow
         const result = await toolExecutor.execute(parsed);
 
         // Add tool result to messages
@@ -280,8 +315,8 @@ export class LLMLiteAnalyzer {
         }
       }
 
-      // If we got findings, we're done
-      if (rawFindings.length > 0 || toolCallCounts.report_findings > 0) {
+      // If report_findings was called, we're done (regardless of findings count)
+      if (toolCallCounts.report_findings > 0) {
         break;
       }
     }
@@ -294,7 +329,8 @@ export class LLMLiteAnalyzer {
       changedFiles,
       toolExecutor.getFetchedDiffs(),
       validCategories,
-      categoryAliases
+      categoryAliases,
+      prompts.ruleIds
     );
 
     const verificationResult = await verificationEngine.verify(rawFindings);
@@ -362,46 +398,31 @@ export class LLMLiteAnalyzer {
   }
 
   /**
-   * Build system prompt
+   * Build system prompt from loaded prompts and rules
    */
-  private buildSystemPrompt(validCategories: string[]): string {
+  private buildSystemPrompt(validCategories: string[], prompts: LoadedPrompts): string {
     const categoryList = validCategories.length > 0
-      ? `\n\nValid categories (you MUST use only these):\n${validCategories.map(c => `- ${c}`).join('\n')}`
+      ? `\n\n## Valid Categories\n\nYou MUST use only these categories:\n${validCategories.map(c => `- ${c}`).join('\n')}`
       : '';
 
-    return `You are a code reviewer analyzing changes in a codebase.
+    // Combine: system prompt + rules context + categories
+    let fullPrompt = prompts.system;
 
-Your goal is to find REAL issues in the code - not hypothetical problems.
+    // Add project-specific rules if any
+    if (prompts.rulesContext) {
+      fullPrompt += `\n\n${prompts.rulesContext}`;
+    }
 
-## Instructions
+    // Add valid categories
+    fullPrompt += categoryList;
 
-1. First, use get_diffs() to fetch diffs for suspicious files
-2. Analyze the actual changes in the diffs
-3. If you need more context, use get_file_chunks() sparingly
-4. Report all findings using report_findings()
-
-## Important Rules
-
-- Only report issues you actually see in the code
-- Include specific line numbers FROM THE DIFFS
-- Include code snippets to prove the issue exists
-- Focus on: security, correctness, performance, maintainability
-- Don't report style issues unless they affect readability significantly
-${categoryList}
-
-## Severity Guide
-
-- blocker: Security vulnerability, data loss risk, crash
-- high: Bug, incorrect behavior, performance issue
-- medium: Code smell, potential issue, minor bug
-- low: Suggestion, improvement opportunity
-- info: Note, observation`;
+    return fullPrompt;
   }
 
   /**
-   * Build initial prompt with file list
+   * Build initial prompt with file list and task context
    */
-  private buildInitialPrompt(files: FileSummary[]): string {
+  private buildInitialPrompt(files: FileSummary[], prompts: LoadedPrompts): string {
     const fileList = files.map(f => {
       const stats = `+${f.additions}/-${f.deletions}`;
       const status = f.isNewFile ? 'new file' : 'modified';
@@ -420,25 +441,8 @@ ${fileList}`;
       prompt += `\n\n## Repository Scope\n${this.repoScope.join(', ')}`;
     }
 
-    prompt += `\n\n## Your Task
-
-1. Review the file list and identify files most likely to have issues:
-   - Security-sensitive files (auth, crypto, input handling)
-   - Files with large changes (+50 lines)
-   - New files (need thorough review)
-   - Core business logic
-
-2. Use get_diffs() to fetch diffs for suspicious files (max 15 per call)
-
-3. Analyze the diffs for:
-   - Security vulnerabilities
-   - Logic errors and edge cases
-   - Performance issues
-   - Code quality problems
-
-4. Report all findings using report_findings()
-
-Focus on ACTUAL issues in the changed code, not hypothetical problems.`;
+    // Add task prompt from loaded prompts
+    prompt += `\n\n${prompts.task}`;
 
     return prompt;
   }
@@ -453,9 +457,26 @@ Focus on ACTUAL issues in the changed code, not hypothetical problems.`;
         : v.action === 'downgrade' ? 'likely' as const
         : 'heuristic' as const;
 
+      // Determine ruleId: use LLM-provided ruleId if valid, otherwise generate from category
+      // ruleId from LLM means it matched a project rule (e.g., "security/no-eval")
+      // null/undefined means ad-hoc finding (LLM found it without matching a rule)
+      let projectRuleId = v.finding.ruleId;
+
+      // LLM sometimes includes "rule:" prefix - strip it if present
+      if (projectRuleId?.startsWith('rule:')) {
+        projectRuleId = projectRuleId.slice(5);
+      }
+
+      const ruleId = projectRuleId
+        ? `rule:${projectRuleId}`  // Matched project rule
+        : `llm-lite:${v.finding.category}`;  // Ad-hoc LLM finding
+
+      // Source indicates whether finding came from a project rule or LLM's own analysis
+      const source = projectRuleId ? 'rule' : 'llm';
+
       return {
         id: `llm-lite-${v.finding.file}-${v.finding.line}`,
-        ruleId: `llm-lite:${v.finding.category}`,
+        ruleId,
         file: v.finding.file,
         line: v.finding.line,
         endLine: v.finding.endLine,
@@ -465,7 +486,7 @@ Focus on ACTUAL issues in the changed code, not hypothetical problems.`;
         confidence,
         type: v.finding.category,
         engine: 'llm-lite',
-        source: 'llm',
+        source,
         suggestion: v.finding.suggestion,
         snippet: v.finding.codeSnippet,
       };

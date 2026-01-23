@@ -47,6 +47,8 @@ export interface RawFinding {
   message: string;
   suggestion?: string;
   codeSnippet?: string;
+  /** Rule ID if this finding matches a project rule (e.g., "security/no-eval") */
+  ruleId?: string | null;
 }
 
 /**
@@ -92,7 +94,12 @@ export interface ToolBudget {
 /**
  * Tool definitions for LLM
  */
-export function buildToolDefinitions(validCategories: string[]) {
+export function buildToolDefinitions(validCategories: string[], validRuleIds: string[] = []) {
+  // Build rule ID description with list of available rules
+  const ruleIdDescription = validRuleIds.length > 0
+    ? `Rule ID if matches a project rule. Available rules: ${validRuleIds.join(', ')}. Use null if finding doesn't match any rule.`
+    : 'Rule ID if matches project rule (e.g., "security/no-eval"), null if ad-hoc finding';
+
   return [
     {
       name: 'get_diffs',
@@ -147,7 +154,8 @@ Use sparingly - prefer analyzing diffs first.`,
       description: `Report all code review findings. Call once when done analyzing.
 Only report actual issues found in the code you reviewed - not hypotheticals.
 Include specific line numbers from the diffs you analyzed.
-Provide code snippets to help with verification.`,
+Provide code snippets to help with verification.
+IMPORTANT: If a finding matches a project rule, you MUST include the exact ruleId from the list.`,
       parameters: {
         type: 'object',
         properties: {
@@ -173,6 +181,10 @@ Provide code snippets to help with verification.`,
                 message: { type: 'string', description: 'Clear description of the issue' },
                 suggestion: { type: 'string', description: 'How to fix (optional)' },
                 codeSnippet: { type: 'string', description: 'Problematic code from diff' },
+                ruleId: {
+                  type: ['string', 'null'],
+                  description: ruleIdDescription,
+                },
               },
               required: ['file', 'line', 'severity', 'category', 'message'],
             },
@@ -285,10 +297,13 @@ export class ToolExecutor {
       .slice(0, this.budget.maxFilesPerDiff)
       .filter(f => {
         // Must be in changed files list
-        if (!this.changedFiles.has(f)) return false;
-        // Path traversal protection
+        if (!this.changedFiles.has(f)) {
+          return false;
+        }
+        // Path traversal protection using relative path check
         const fullPath = path.resolve(this.cwd, f);
-        return fullPath.startsWith(resolvedCwd + path.sep) || fullPath === resolvedCwd;
+        const relative = path.relative(resolvedCwd, fullPath);
+        return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
       });
 
     if (validFiles.length === 0) {
@@ -390,11 +405,13 @@ export class ToolExecutor {
         // Path traversal protection: ensure file is within cwd
         const fullPath = path.resolve(this.cwd, request.file);
         const resolvedCwd = path.resolve(this.cwd);
-        if (!fullPath.startsWith(resolvedCwd + path.sep) && fullPath !== resolvedCwd) {
+        const relative = path.relative(resolvedCwd, fullPath);
+        if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
           useLogger()?.debug(`[ToolExecutor] Path traversal blocked: ${request.file}`);
           continue;
         }
 
+        // eslint-disable-next-line no-await-in-loop -- Sequential file reading for chunk extraction
         const content = await readFile(fullPath, 'utf-8');
         const lines = content.split('\n');
 

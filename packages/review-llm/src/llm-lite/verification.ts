@@ -28,6 +28,8 @@ export interface VerificationChecks {
   snippetMatch: number;
   /** Does the issue make sense for this file type? */
   contextValid: boolean;
+  /** Is ruleId valid (matches a project rule) or null? */
+  ruleIdValid: boolean;
 }
 
 /**
@@ -105,7 +107,8 @@ const THRESHOLDS = {
 };
 
 /**
- * Score weights for each check
+ * Score weights for each check.
+ * Total = 1.0 (ruleIdValid is bonus that can push score above base)
  */
 const SCORE_WEIGHTS = {
   severityValid: 0.075,
@@ -115,6 +118,7 @@ const SCORE_WEIGHTS = {
   lineInDiff: 0.2,
   snippetMatch: 0.2,
   contextValid: 0.1,
+  ruleIdValid: 0.05, // Bonus for using valid project rule ID
 };
 
 /**
@@ -126,6 +130,7 @@ export class VerificationEngine {
   private fetchedDiffs: Map<string, FileDiff>;
   private validCategories: string[];
   private categoryAliases: Record<string, string>;
+  private validRuleIds: Set<string>;
   private fileContents: Map<string, string> = new Map();
 
   constructor(
@@ -133,13 +138,15 @@ export class VerificationEngine {
     changedFiles: string[],
     fetchedDiffs: Map<string, FileDiff>,
     validCategories: string[],
-    categoryAliases: Record<string, string> = {}
+    categoryAliases: Record<string, string> = {},
+    validRuleIds: Set<string> = new Set()
   ) {
     this.cwd = cwd;
     this.changedFiles = new Set(changedFiles);
     this.fetchedDiffs = fetchedDiffs;
     this.validCategories = validCategories;
     this.categoryAliases = categoryAliases;
+    this.validRuleIds = validRuleIds;
   }
 
   /**
@@ -153,6 +160,7 @@ export class VerificationEngine {
     let downgradedCount = 0;
 
     for (const finding of findings) {
+      // eslint-disable-next-line no-await-in-loop -- Sequential verification maintains order
       const result = await this.verifyFinding(finding);
 
       if (result.action === 'discard') {
@@ -191,6 +199,9 @@ export class VerificationEngine {
     const severityNorm = this.normalizeSeverity(finding.severity);
     const categoryNorm = this.normalizeCategory(finding.category);
 
+    // Validate ruleId
+    const ruleIdValid = this.validateRuleId(finding.ruleId);
+
     // Run all checks
     const checks: VerificationChecks = {
       severityValid: severityNorm.valid,
@@ -200,6 +211,7 @@ export class VerificationEngine {
       lineInDiff: this.checkLineInDiff(finding.file, finding.line),
       snippetMatch: await this.matchSnippet(finding.file, finding.line, finding.codeSnippet),
       contextValid: this.checkContext(finding),
+      ruleIdValid,
     };
 
     // Calculate score
@@ -266,9 +278,9 @@ export class VerificationEngine {
   private normalizeCategory(value: string): { valid: boolean; normalized: string } {
     const lower = value.toLowerCase().trim();
 
-    // No categories configured - accept anything
+    // No categories configured - accept anything as valid (skip category validation)
     if (this.validCategories.length === 0) {
-      return { valid: false, normalized: value };
+      return { valid: true, normalized: value };
     }
 
     // Direct match
@@ -289,11 +301,15 @@ export class VerificationEngine {
    * Check if line is within file bounds
    */
   private async checkLineInBounds(file: string, line: number): Promise<boolean> {
-    if (line < 1) return false;
+    if (line < 1) {
+      return false;
+    }
 
     try {
       const content = await this.getFileContent(file);
-      if (!content) return false;
+      if (!content) {
+        return false;
+      }
 
       const lineCount = content.split('\n').length;
       return line <= lineCount;
@@ -307,7 +323,9 @@ export class VerificationEngine {
    */
   private checkLineInDiff(file: string, line: number): boolean {
     const diff = this.fetchedDiffs.get(file);
-    if (!diff) return false;
+    if (!diff) {
+      return false;
+    }
 
     return diff.changedLines.has(line);
   }
@@ -321,11 +339,15 @@ export class VerificationEngine {
     snippet?: string
   ): Promise<number> {
     // No snippet = neutral score
-    if (!snippet) return 0.5;
+    if (!snippet) {
+      return 0.5;
+    }
 
     try {
       const content = await this.getFileContent(file);
-      if (!content) return 0;
+      if (!content) {
+        return 0;
+      }
 
       const lines = content.split('\n');
       const windowSize = 5;
@@ -406,6 +428,24 @@ export class VerificationEngine {
   }
 
   /**
+   * Validate ruleId - must be null or a valid rule ID from project rules
+   */
+  private validateRuleId(ruleId: string | null | undefined): boolean {
+    // null is valid (ad-hoc finding)
+    if (ruleId === null || ruleId === undefined) {
+      return true;
+    }
+
+    // If no rules configured, accept any ruleId
+    if (this.validRuleIds.size === 0) {
+      return true;
+    }
+
+    // Check if ruleId matches a known rule
+    return this.validRuleIds.has(ruleId);
+  }
+
+  /**
    * Check if finding makes sense for file context
    */
   private checkContext(finding: RawFinding): boolean {
@@ -446,13 +486,29 @@ export class VerificationEngine {
   private calculateScore(checks: VerificationChecks): number {
     let score = 0;
 
-    if (checks.severityValid) score += SCORE_WEIGHTS.severityValid;
-    if (checks.categoryValid) score += SCORE_WEIGHTS.categoryValid;
-    if (checks.fileExists) score += SCORE_WEIGHTS.fileExists;
-    if (checks.lineInBounds) score += SCORE_WEIGHTS.lineInBounds;
-    if (checks.lineInDiff) score += SCORE_WEIGHTS.lineInDiff;
+    if (checks.severityValid) {
+      score += SCORE_WEIGHTS.severityValid;
+    }
+    if (checks.categoryValid) {
+      score += SCORE_WEIGHTS.categoryValid;
+    }
+    if (checks.fileExists) {
+      score += SCORE_WEIGHTS.fileExists;
+    }
+    if (checks.lineInBounds) {
+      score += SCORE_WEIGHTS.lineInBounds;
+    }
+    if (checks.lineInDiff) {
+      score += SCORE_WEIGHTS.lineInDiff;
+    }
     score += checks.snippetMatch * SCORE_WEIGHTS.snippetMatch;
-    if (checks.contextValid) score += SCORE_WEIGHTS.contextValid;
+    if (checks.contextValid) {
+      score += SCORE_WEIGHTS.contextValid;
+    }
+    // Bonus for using valid project rule ID (increases confidence)
+    if (checks.ruleIdValid) {
+      score += SCORE_WEIGHTS.ruleIdValid;
+    }
 
     return score;
   }
@@ -496,7 +552,8 @@ export function createVerificationEngine(
   changedFiles: string[],
   fetchedDiffs: Map<string, FileDiff>,
   validCategories: string[],
-  categoryAliases?: Record<string, string>
+  categoryAliases?: Record<string, string>,
+  validRuleIds?: Set<string>
 ): VerificationEngine {
-  return new VerificationEngine(cwd, changedFiles, fetchedDiffs, validCategories, categoryAliases);
+  return new VerificationEngine(cwd, changedFiles, fetchedDiffs, validCategories, categoryAliases, validRuleIds);
 }
