@@ -480,6 +480,24 @@ export interface ReviewConfig {
 
   // Custom analyzers directory (default: .kb/review/analyzers)
   analyzersDir?: string;
+
+  // Rules directory (relative to .kb/, default: ai-review/rules)
+  rulesDir?: string;
+
+  // Prompts directory (relative to .kb/, default: ai-review/prompts)
+  promptsDir?: string;
+
+  // LLM configuration for llm-lite mode
+  llm?: {
+    // Minimum turns for LLM conversation (default: 3)
+    minTurns?: number;
+    // Maximum turns for LLM conversation (default: 25)
+    maxTurns?: number;
+    // Files per turn for adaptive calculation (default: 10)
+    filesPerTurn?: number;
+    // Lines per turn for adaptive calculation (default: 500)
+    linesPerTurn?: number;
+  };
 }
 
 /**

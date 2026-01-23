@@ -13,6 +13,8 @@ import {
 } from '@kb-labs/sdk';
 import type { ReviewMode, ReviewResult, InputFile } from '@kb-labs/review-contracts';
 import { runReview, resolveGitScope, getReposWithChanges } from '@kb-labs/review-core';
+import * as path from 'node:path';
+import { realpath } from 'node:fs/promises';
 
 /**
  * Flags for review:run command
@@ -44,6 +46,12 @@ interface AgentReviewReport {
     problem: string;
     fix: string;
     severity: 'blocker' | 'high' | 'medium' | 'low' | 'info';
+    /** Rule ID (e.g., "rule:security/no-eval" or "llm-lite:security") */
+    ruleId: string;
+    /** Source: "rule" (matched project rule) or "llm" (ad-hoc finding) */
+    source: 'rule' | 'llm';
+    /** Confidence score (0.0-1.0) from verification engine */
+    confidence: number;
   }>;
   /** One-line summary for logs */
   summary: string;
@@ -101,27 +109,45 @@ const SECURITY_REGEX_PATTERNS = [
 
 /**
  * Validate that a file path is within the allowed directory.
- * Prevents path traversal attacks.
+ * Prevents path traversal attacks including symlink bypass.
+ * Uses fs.realpath() to resolve symlinks and path.relative() for cross-platform safety.
  */
-function isPathWithinCwd(filePath: string, cwd: string): boolean {
-  const path = require('node:path');
-  const resolvedPath = path.resolve(cwd, filePath);
-  const resolvedCwd = path.resolve(cwd);
-  return resolvedPath.startsWith(resolvedCwd + path.sep) || resolvedPath === resolvedCwd;
+async function isPathWithinCwd(filePath: string, cwd: string): Promise<boolean> {
+  try {
+    const resolvedPath = path.resolve(cwd, filePath);
+    const resolvedCwd = path.resolve(cwd);
+
+    // Resolve symlinks to prevent symlink bypass attacks
+    const realPath = await realpath(resolvedPath).catch(() => resolvedPath);
+    const realCwd = await realpath(resolvedCwd).catch(() => resolvedCwd);
+
+    const relative = path.relative(realCwd, realPath);
+    // Path is within cwd if relative path exists, doesn't start with '..', and isn't absolute
+    return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative);
+  } catch {
+    // If path doesn't exist or can't be resolved, reject it
+    return false;
+  }
 }
 
 /**
  * Filter file paths for security concerns.
  */
-function filterSecurePaths(filePaths: string[], cwd: string): string[] {
-  return filePaths.filter(filePath => {
-    // Path traversal check
-    if (!isPathWithinCwd(filePath, cwd)) {
-      return false;
-    }
-    // Security pattern check
-    return !SECURITY_REGEX_PATTERNS.some(pattern => pattern.test(filePath));
-  });
+async function filterSecurePaths(filePaths: string[], cwd: string): Promise<string[]> {
+  const results = await Promise.all(
+    filePaths.map(async filePath => {
+      // Path traversal check (including symlink resolution)
+      if (!await isPathWithinCwd(filePath, cwd)) {
+        return null;
+      }
+      // Security pattern check
+      if (SECURITY_REGEX_PATTERNS.some(pattern => pattern.test(filePath))) {
+        return null;
+      }
+      return filePath;
+    })
+  );
+  return results.filter((p): p is string => p !== null);
 }
 
 /**
@@ -150,6 +176,13 @@ function toAgentReport(result: ReviewResult): AgentReviewReport {
     problem: f.message,
     fix: f.suggestion ?? 'Review and fix manually',
     severity: f.severity as 'blocker' | 'high' | 'medium' | 'low' | 'info',
+    ruleId: f.ruleId ?? 'unknown',
+    source: (f.ruleId?.startsWith('rule:') ? 'rule' : 'llm') as 'rule' | 'llm',
+    // Map categorical confidence to numeric score (default 0.5 for undefined/unknown)
+    confidence: f.confidence === 'certain' ? 1.0
+      : f.confidence === 'likely' ? 0.8
+      : f.confidence === 'heuristic' ? 0.6
+      : 0.5,
   }));
 
   // Count non-blocking issues for summary
@@ -219,7 +252,7 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
         } else if (flags.files) {
           // Use explicitly provided files (with security validation)
           const filePaths = Array.isArray(flags.files) ? flags.files : [flags.files];
-          const safeFilePaths = filterSecurePaths(filePaths, cwd);
+          const safeFilePaths = await filterSecurePaths(filePaths, cwd);
 
           const fileReadResults = await Promise.allSettled(
             safeFilePaths.map(async (filePath) => ({
@@ -297,7 +330,7 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
           // If we used glob fallback, read file contents
           if (files.length === 0 && filePaths.length > 0) {
             // Apply security filtering (path traversal + pattern matching)
-            const safeFilePaths = filterSecurePaths(filePaths, cwd);
+            const safeFilePaths = await filterSecurePaths(filePaths, cwd);
 
             // Read files with individual error handling
             const fileReadResults = await Promise.allSettled(
@@ -364,11 +397,21 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
             summaryItems.push(`Repos: ${repoScope.join(', ')}`);
           }
 
-          if (counts.blocker > 0) summaryItems.push(`Blocker: ${counts.blocker}`);
-          if (counts.high > 0) summaryItems.push(`High: ${counts.high}`);
-          if (counts.medium > 0) summaryItems.push(`Medium: ${counts.medium}`);
-          if (counts.low > 0) summaryItems.push(`Low: ${counts.low}`);
-          if (counts.info > 0) summaryItems.push(`Info: ${counts.info}`);
+          if (counts.blocker > 0) {
+            summaryItems.push(`Blocker: ${counts.blocker}`);
+          }
+          if (counts.high > 0) {
+            summaryItems.push(`High: ${counts.high}`);
+          }
+          if (counts.medium > 0) {
+            summaryItems.push(`Medium: ${counts.medium}`);
+          }
+          if (counts.low > 0) {
+            summaryItems.push(`Low: ${counts.low}`);
+          }
+          if (counts.info > 0) {
+            summaryItems.push(`Info: ${counts.info}`);
+          }
 
           summaryItems.push(`Engines: ${result.metadata.engines.join(', ')}`);
 
@@ -380,9 +423,15 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
             }
             if (incr.newFindings > 0 || incr.knownFindings > 0 || incr.cachedFindings > 0) {
               const parts: string[] = [];
-              if (incr.newFindings > 0) parts.push(`${incr.newFindings} new`);
-              if (incr.knownFindings > 0) parts.push(`${incr.knownFindings} known`);
-              if (incr.cachedFindings > 0) parts.push(`${incr.cachedFindings} cached`);
+              if (incr.newFindings > 0) {
+                parts.push(`${incr.newFindings} new`);
+              }
+              if (incr.knownFindings > 0) {
+                parts.push(`${incr.knownFindings} known`);
+              }
+              if (incr.cachedFindings > 0) {
+                parts.push(`${incr.cachedFindings} cached`);
+              }
               summaryItems.push(`Breakdown: ${parts.join(', ')}`);
             }
           }

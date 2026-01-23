@@ -35,9 +35,9 @@ export function formatFindings(findings: ReviewFinding[]): string {
       const severity = formatSeverity(finding.severity);
       const location = chalk.dim(`${finding.line}:${finding.column ?? 0}`);
       const message = finding.message;
-      const ruleId = chalk.dim(`[${finding.ruleId}]`);
+      const sourceTag = formatSource(finding.source, finding.ruleId);
 
-      lines.push(`  ${location} ${severity} ${message} ${ruleId}`);
+      lines.push(`  ${location} ${severity} ${message} ${sourceTag}`);
 
       // Show fix hint if available
       if (finding.fix && finding.automated) {
@@ -47,6 +47,26 @@ export function formatFindings(findings: ReviewFinding[]): string {
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Format source tag (rule vs llm).
+ * Shows whether finding came from a project rule or LLM ad-hoc analysis.
+ */
+function formatSource(source: string, ruleId: string): string {
+  // Parse ruleId format: "rule:category/name" or "llm-lite:category"
+  if (ruleId.startsWith('rule:')) {
+    // Project rule - show rule ID with green highlight
+    const projectRuleId = ruleId.slice(5); // Remove "rule:" prefix
+    return chalk.green(`[rule:${projectRuleId}]`);
+  } else if (ruleId.startsWith('llm-lite:')) {
+    // LLM ad-hoc finding - show category with dim styling
+    const category = ruleId.slice(9); // Remove "llm-lite:" prefix
+    return chalk.dim(`[llm:${category}]`);
+  } else {
+    // Legacy format - just show the ruleId
+    return chalk.dim(`[${ruleId}]`);
+  }
 }
 
 /**
@@ -88,8 +108,21 @@ export function formatSummary(result: ReviewResult): string {
     info: 0,
   };
 
+  // Count by source (rule vs llm)
+  const sourceCounts = {
+    rule: 0,
+    llm: 0,
+  };
+
   for (const finding of result.findings) {
     counts[finding.severity]++;
+
+    // Count by source based on ruleId format
+    if (finding.ruleId.startsWith('rule:')) {
+      sourceCounts.rule++;
+    } else {
+      sourceCounts.llm++;
+    }
   }
 
   // Format counts
@@ -114,6 +147,18 @@ export function formatSummary(result: ReviewResult): string {
   lines.push(`  Files:   ${result.metadata.analyzedFiles}`);
   lines.push(`  Time:    ${result.metadata.durationMs}ms`);
   lines.push(`  Engines: ${result.metadata.engines.join(', ')}`);
+
+  // Show source breakdown if there are findings
+  if (result.findings.length > 0) {
+    lines.push('');
+    lines.push(chalk.bold('  Finding Sources:'));
+    if (sourceCounts.rule > 0) {
+      lines.push(chalk.green(`    From rules: ${sourceCounts.rule}`));
+    }
+    if (sourceCounts.llm > 0) {
+      lines.push(chalk.dim(`    LLM ad-hoc: ${sourceCounts.llm}`));
+    }
+  }
 
   return lines.join('\n');
 }
