@@ -1,19 +1,14 @@
 import { defineConfig } from 'tsup';
+import nodePreset from '@kb-labs/devkit/tsup/node';
 
 export default defineConfig({
+  ...nodePreset,
+  tsconfig: 'tsconfig.build.json',
   entry: ['src/index.ts'],
-  format: ['esm'],
   dts: true,
-  clean: true,
-  sourcemap: false,
-  treeshake: true,
-  splitting: false,
-  minify: false,
+  // Keep necessary external deps (glob is not workspace package)
   external: [
-    '@kb-labs/review-contracts',
-    '@kb-labs/review-heuristic',
-    '@kb-labs/sdk',
-    '@kb-labs/core-sys',
+    ...nodePreset.external,
     'glob',
   ],
 });

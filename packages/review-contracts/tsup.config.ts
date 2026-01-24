@@ -1,15 +1,9 @@
 import { defineConfig } from 'tsup';
-import { readFileSync } from 'fs';
-
-const externalDeps = JSON.parse(
-  readFileSync(new URL('../../../tsup.external.json', import.meta.url), 'utf-8')
-);
+import nodePreset from '@kb-labs/devkit/tsup/node';
 
 export default defineConfig({
+  ...nodePreset,
+  tsconfig: 'tsconfig.build.json',
   entry: ['src/index.ts'],
-  format: ['esm'],
   dts: true,
-  sourcemap: true,
-  clean: true,
-  external: externalDeps.external,
 });
