@@ -1,0 +1,6 @@
+{
+  "files": [],
+  "references": [{ "path": "./packages/" }],
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": { "composite": true, "noEmit": true }
+}
