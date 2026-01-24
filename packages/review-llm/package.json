@@ -36,7 +36,9 @@
     "dev": "tsup --config tsup.config.ts --watch",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@kb-labs/review-contracts": "workspace:*",

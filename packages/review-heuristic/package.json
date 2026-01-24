@@ -11,16 +11,27 @@
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "dev": "tsup --config tsup.config.ts --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@kb-labs/review-contracts": "workspace:*"
   },
   "devDependencies": {
     "@kb-labs/devkit": "link:../../../kb-labs-devkit",
-    "@types/node": "^20.11.0",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3",
-    "rimraf": "^5.0.5"
+    "@types/node": "^24.3.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.6.3",
+    "rimraf": "^6.0.1",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   }
 }
