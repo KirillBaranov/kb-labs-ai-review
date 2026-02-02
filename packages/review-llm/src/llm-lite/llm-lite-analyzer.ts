@@ -159,6 +159,7 @@ export class LLMLiteAnalyzer {
   /**
    * Run LLM-Lite analysis
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- Complex multi-phase LLM analysis workflow with prompt loading, validation, and result processing
   async analyze(): Promise<LLMLiteResult> {
     const startTime = Date.now();
     const analytics = useAnalytics();

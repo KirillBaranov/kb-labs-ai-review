@@ -262,6 +262,7 @@ async function loadRules(rulesDir: string): Promise<Record<string, RuleContent[]
 /**
  * Format rules as context string for prompt
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity -- Complex multi-level categorization and formatting of rules into structured prompt sections
 function formatRulesContext(rules: Record<string, RuleContent[]>): string {
   const positiveSections: string[] = [];
   const negativeSections: string[] = [];
@@ -395,10 +396,8 @@ function parseFrontmatter(content: string): { frontmatter: RuleFrontmatter | nul
       if (validSeverities.includes(value)) {
         frontmatter.severity = value as RuleFrontmatter['severity'];
       }
-    } else if (key === 'type') {
-      if (value === 'positive' || value === 'negative') {
-        frontmatter.type = value;
-      }
+    } else if (key === 'type' && (value === 'positive' || value === 'negative')) {
+      frontmatter.type = value;
     }
   }
 

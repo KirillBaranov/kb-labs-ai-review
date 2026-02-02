@@ -205,6 +205,7 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
   description: 'Run code review analysis',
 
   handler: {
+    // eslint-disable-next-line sonarjs/cognitive-complexity -- Main orchestration handler: coordinates input modes (repos/files/scope), git resolution, security filtering, output formats (agent/json/human), and severity-based exit codes
     async execute(ctx: PluginContextV3, input: CLIInput<RunFlags>): Promise<CommandResult<ReviewResult>> {
       const startTime = Date.now();
 

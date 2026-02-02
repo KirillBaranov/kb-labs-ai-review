@@ -72,6 +72,7 @@ export class ArchitectureAnalyzer extends BaseLLMAnalyzer {
   readonly id = 'architecture';
   readonly name = 'Architecture Analysis';
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- Complex LLM-based analysis with caching, error handling, and result validation
   async analyze(files: ParsedFile[], context: ReviewContext): Promise<ReviewFinding[]> {
     const findings: ReviewFinding[] = [];
     const cache = useCache();

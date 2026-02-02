@@ -68,6 +68,7 @@ export class LinterRunner {
   /**
    * Run a specific linter on files.
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- Complex orchestration of linter execution with error handling, config discovery, and result processing
   async runEngine(engineId: string, files: string[]): Promise<LinterResult> {
     const startTime = Date.now();
     const engine = this.engines.get(engineId);

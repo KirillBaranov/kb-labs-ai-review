@@ -27,6 +27,12 @@
       "@kb-labs/review-llm/*": [
         "packages/review-llm/src/*"
       ],
+      "@kb-labs/sdk": [
+        "../kb-labs-sdk/packages/sdk/src/index.ts"
+      ],
+      "@kb-labs/sdk/*": [
+        "../kb-labs-sdk/packages/sdk/src/*"
+      ],
       "@kb-labs/shared-cli-ui": [
         "../kb-labs-shared/packages/shared-cli-ui/src/index.ts"
       ],

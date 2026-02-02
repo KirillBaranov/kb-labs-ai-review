@@ -140,11 +140,9 @@ export async function discoverCategories(cwd: string): Promise<string[]> {
 
     // Read subdirectories
     const entries = await readdir(fullPath, { withFileTypes: true });
-    const categories = entries
+    return entries
       .filter(e => e.isDirectory() && !e.name.startsWith('.'))
       .map(e => e.name.toLowerCase());
-
-    return categories;
   } catch {
     // Error discovering categories
     return [];

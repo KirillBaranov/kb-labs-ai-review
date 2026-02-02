@@ -3,6 +3,8 @@
  * Built-in preset definitions
  */
 
+/* eslint-disable sonarjs/no-duplicate-string -- Preset definitions intentionally share common patterns (eslint:recommended, node_modules, dist, build) across multiple presets */
+
 import type { PresetDefinition } from '@kb-labs/review-contracts';
 
 /**

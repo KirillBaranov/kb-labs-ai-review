@@ -7,7 +7,7 @@ export default defineConfig({
   entry: [
     'src/index.ts',
     'src/manifest.ts',
-    'src/commands/run.ts',
+    'src/commands/**/*.ts',  // Auto-include all CLI commands
   ],
   external: [
     '@kb-labs/sdk',

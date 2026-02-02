@@ -142,6 +142,7 @@ export class DiffProvider implements IDiffProvider {
   /**
    * Parse unified diff into structured format
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- Diff parsing logic: detects file modes (new/deleted/renamed), parses hunks, tracks line numbers, counts additions/deletions
   private parseDiff(file: string, diff: string): FileDiff {
     const hunks: DiffHunk[] = [];
     const changedLines = new Set<number>();

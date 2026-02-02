@@ -47,6 +47,7 @@ export interface ScopedFiles {
  * 3. Read file contents
  * 4. Return as InputFile[] with paths relative to root
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity -- Git scope resolution: iterates repos, checks nested git, parses status, filters by include flags (staged/unstaged/untracked), reads files, tracks counts
 export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedFiles> {
   const {
     cwd,

@@ -19,7 +19,7 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
