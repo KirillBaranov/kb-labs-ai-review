@@ -23,7 +23,7 @@
     "@kb-labs/review-contracts": "workspace:*",
     "@kb-labs/review-heuristic": "workspace:*",
     "@kb-labs/review-llm": "workspace:*",
-    "@kb-labs/sdk": "link:../../../kb-labs-sdk/packages/sdk",
+    "@kb-labs/sdk": "^1.0.0",
     "simple-git": "^3.25.0"
   },
   "devDependencies": {

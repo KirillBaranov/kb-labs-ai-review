@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# DevLink pre-push hook — managed by kb-labs-devkit, do not edit manually.
+# Switches cross-repo deps to npm mode before push, restores local mode after.
+
+set -e
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+# Check if devlink is available
+if ! pnpm --prefix "$ROOT_DIR" kb devlink --help > /dev/null 2>&1; then
+  echo "[devlink] devlink plugin not available, skipping"
+  exit 0
+fi
+
+echo "[devlink] switching to npm mode..."
+pnpm --prefix "$ROOT_DIR" kb devlink switch --mode=npm
+
+restore() {
+  echo "[devlink] restoring local mode..."
+  pnpm --prefix "$ROOT_DIR" kb devlink undo
+}
+trap restore EXIT

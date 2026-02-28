@@ -68,7 +68,7 @@ export const manifest = {
         handler: './commands/run.js#default',
         handlerPath: './commands/run.js',
 
-        flags: defineCommandFlags(runFlags),
+        flags: defineCommandFlags(runFlags.schema),
 
         examples: [
           'kb review run',

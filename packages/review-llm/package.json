@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@kb-labs/review-contracts": "workspace:*",
-    "@kb-labs/sdk": "link:../../../kb-labs-sdk/packages/sdk"
+    "@kb-labs/sdk": "^1.0.0"
   },
   "devDependencies": {
     "@kb-labs/devkit": "link:../../../kb-labs-devkit",
