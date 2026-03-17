@@ -1,332 +1,306 @@
-# KB Labs AI Review
+# Standard Configuration Templates
 
-AI-powered code review plugin for KB Labs platform.
+This directory contains canonical configuration templates for all `@kb-labs` packages.
 
-## Overview
+## 📋 Available Templates
 
-AI Review combines deterministic code analysis tools (ESLint, Ruff, Clippy) with LLM-powered semantic analysis to provide comprehensive code review feedback.
+### Core Configs (All Packages)
 
-### Key Features
+| File | Purpose | Required | Customizable |
+|------|---------|----------|--------------|
+| **eslint.config.js** | Linting rules | ✅ Yes | ⚠️ Minimal |
+| **tsconfig.json** | TypeScript IDE config | ✅ Yes | ❌ No |
+| **tsconfig.build.json** | TypeScript build config | ✅ Yes | ❌ No |
 
-- **Unified Rule Contract** - All engines (heuristic/LLM) use same interface
-- **Engine Type Priority** - Intelligent deduplication (compiler > linter > sast > ast > llm)
-- **Three Review Modes** - heuristic (CI), full (local), llm (deep)
-- **Content-Hash Caching** - Fast repeat analysis via State Broker
-- **Agent Mode Gating** - Only certain+fixable+local findings shown to agents
-- **Platform Integration** - Uses useLLM(), useCache(), useAnalytics()
+### Tsup Configs (Choose ONE based on package type)
 
-## Quick Start
+| Template | Package Type | Use Cases |
+|----------|--------------|-----------|
+| **tsup.config.ts** | 📦 **Library** (default) | Most packages, importable libraries |
+| **tsup.config.bin.ts** | 🔧 **Binary** | Standalone executables, CLI bins |
+| **tsup.config.cli.ts** | ⌨️ **CLI** | CLI packages with commands |
+| **tsup.config.dual.ts** | 📦🔧 **Library + Binary** | Packages with both API and bin |
 
+### Package.json Examples
+
+| Template | Purpose |
+|----------|---------|
+| **package.json.lib** | Library package example |
+| **package.json.bin** | Binary package example |
+
+## 🎯 Philosophy
+
+**Convention over Configuration**
+
+All `@kb-labs` packages MUST use these exact templates with minimal customization. This ensures:
+
+- ✅ Consistent build output across all packages
+- ✅ Predictable dependency resolution
+- ✅ Unified linting standards
+- ✅ Easy maintenance and upgrades
+
+## 📦 Usage
+
+### For New Packages
+
+#### Step 1: Choose Package Type
+
+**Library Package** (most common):
 ```bash
-# Install and build
-cd kb-labs-ai-review
-pnpm install
-pnpm run build
-
-# Run code review (heuristic mode - fast, CI-friendly)
-pnpm kb review run
-
-# Full analysis (heuristic + LLM - best quality)
-pnpm kb review run --mode=full
-
-# Deep LLM-only analysis
-pnpm kb review run --mode=llm
-
-# Analyze specific scope
-pnpm kb review run --scope=all        # All TypeScript/JavaScript files
-pnpm kb review run --scope=changed    # Changed files (git diff)
-pnpm kb review run --scope=staged     # Staged files (git add)
-
-# Use specific preset
-pnpm kb review run --preset=typescript-strict
-pnpm kb review run --preset=react
-pnpm kb review run --preset=security
-
-# Analyze specific files
-pnpm kb review run --files="src/**/*.ts"
-
-# JSON output (for agents/CI)
-pnpm kb review run --json
+cp kb-labs-devkit/templates/configs/tsup.config.ts your-package/
+cp kb-labs-devkit/templates/configs/eslint.config.js your-package/
+cp kb-labs-devkit/templates/configs/tsconfig*.json your-package/
+cp kb-labs-devkit/templates/configs/package.json.lib your-package/package.json
 ```
 
-## Packages
+**Binary Package** (standalone executables):
+```bash
+cp kb-labs-devkit/templates/configs/tsup.config.bin.ts your-package/tsup.config.ts
+cp kb-labs-devkit/templates/configs/eslint.config.js your-package/
+cp kb-labs-devkit/templates/configs/tsconfig*.json your-package/
+cp kb-labs-devkit/templates/configs/package.json.bin your-package/package.json
+```
 
-This monorepo contains 4 packages:
+**CLI Package** (command handlers):
+```bash
+cp kb-labs-devkit/templates/configs/tsup.config.cli.ts your-package/tsup.config.ts
+cp kb-labs-devkit/templates/configs/eslint.config.js your-package/
+cp kb-labs-devkit/templates/configs/tsconfig*.json your-package/
+cp kb-labs-devkit/templates/configs/package.json.lib your-package/package.json
+```
 
-### @kb-labs/review-contracts
+**Dual Package** (library + binary):
+```bash
+cp kb-labs-devkit/templates/configs/tsup.config.dual.ts your-package/tsup.config.ts
+cp kb-labs-devkit/templates/configs/eslint.config.js your-package/
+cp kb-labs-devkit/templates/configs/tsconfig*.json your-package/
+cp kb-labs-devkit/templates/configs/package.json.lib your-package/package.json
+# Then add "bin" field to package.json
+```
 
-Type definitions and contracts used across all packages.
+#### Step 2: Customize Package Name
+```bash
+# Edit package.json and update name, description
+```
 
-**Key types:**
-- `ReviewFinding` - Single code review finding
-- `ReviewRule` - Rule definition
-- `ReviewPreset` - Configuration preset
-- `ReviewResult` - Complete review result
-- `EngineType` - Engine categories (compiler/linter/sast/ast/llm)
+### For Existing Packages
 
-[Documentation](./packages/review-contracts/README.md)
+```bash
+# Check for drift
+npx kb-devkit-check-configs
 
-### @kb-labs/review-heuristic
+# Auto-fix drift
+npx kb-devkit-check-configs --fix
+```
 
-Heuristic analysis engines for deterministic code analysis.
+## 🔧 Customization Rules
 
-**Features:**
-- ESLint adapter (TypeScript/JavaScript)
-- Engine registry with type mappings
-- Fingerprint-based deduplication
-- Engine type priority system
+### tsup.config.ts
 
-[Documentation](./packages/review-heuristic/README.md)
-
-### @kb-labs/review-core
-
-Core orchestration logic coordinating heuristic engines, LLM analyzers, caching, and deduplication.
-
-**Features:**
-- ReviewOrchestrator for all three modes
-- Platform composables integration
-- Intelligent caching
-- Analytics tracking
-
-[Documentation](./packages/review-core/README.md)
-
-### @kb-labs/review-cli
-
-CLI commands for running code reviews.
-
-**Commands:**
-- `review:run` - Run code review analysis
-
-[Documentation](./packages/review-cli/README.md)
-
-## Architecture
-
-### Review Modes
-
-**heuristic (CI Mode)**
-- Fast, deterministic analysis
-- ESLint, Ruff, golangci-lint, Clippy
-- No LLM calls
-- Perfect for CI pipelines
-
-**full (Local Mode)**
-- Heuristic + LLM analysis
-- Comprehensive coverage
-- Cached LLM results
-- Ideal for pre-PR review
-
-**llm (Deep Analysis Mode)**
-- LLM-only semantic analysis
-- Naming, architecture, logic bugs
-- Best quality, most expensive
-- For complex refactoring
-
-### Engine Type Priority
-
-Deduplication uses engine TYPE priority, not specific tool priority:
-
-1. **compiler** (priority 1) - TypeScript compiler, rustc, go build
-2. **linter** (priority 2) - ESLint, Ruff, golangci-lint, Clippy, RuboCop
-3. **sast** (priority 3) - Semgrep, CodeQL, Bandit
-4. **ast** (priority 4) - tree-sitter (read-only AST)
-5. **llm** (priority 5) - LLM-based heuristics
-
-**Example:**
-- TSC (compiler) beats ESLint (linter) for same issue
-- ESLint (linter) beats Semgrep (sast) for same issue
-- Ruff (Python linter) beats Bandit (Python SAST) for same issue
-
-### Deduplication
-
-Findings are deduplicated using:
-
-1. **Fingerprint**: `sha1(ruleId|file|bucket|snippetHash)`
-   - ruleId: Rule identifier
-   - file: File path
-   - bucket: Line bucket (lines 10-19 → bucket 1)
-   - snippetHash: Optional hash of code snippet
-
-2. **Engine Type Priority**: compiler > linter > sast > ast > llm
-
-3. **Severity**: blocker > high > medium > low > info (if same type)
-
-### Platform Integration
+**Allowed customizations:**
 
 ```typescript
-import { useLLM, useCache, useAnalytics } from '@kb-labs/sdk';
+export default defineConfig({
+  ...nodePreset,
+  tsconfig: 'tsconfig.build.json', // ✅ Always required
 
-// Access LLM with tier selection
-const llm = useLLM({ tier: 'medium' });
+  // ✅ OK: Multiple entry points
+  entry: ['src/index.ts', 'src/cli.ts'],
 
-// Access State Broker cache
-const cache = useCache();
+  // ✅ OK: Extra external deps (if really needed)
+  external: ['special-native-module'],
 
-// Track analytics
-const analytics = useAnalytics();
-analytics.track('review:completed', { findings: 10 });
+  dts: true, // ✅ Always required
+});
 ```
 
-## Development
+**NOT allowed:**
 
-### Setup
+```typescript
+// ❌ WRONG: Don't override preset settings
+export default defineConfig({
+  format: ['esm'],        // Already in preset!
+  target: 'es2022',       // Already in preset!
+  sourcemap: true,        // Already in preset!
+  // ...
+});
+
+// ❌ WRONG: Don't disable types
+dts: false,
+
+// ❌ WRONG: Don't duplicate external deps
+external: [
+  '@kb-labs/core',  // Already in preset!
+  '@kb-labs/cli',   // Already in preset!
+],
+```
+
+### eslint.config.js
+
+**Allowed customizations:**
+
+```javascript
+export default [
+  ...nodePreset,
+  {
+    // ✅ OK: Project-specific ignores only
+    ignores: ['**/*.generated.ts']
+  }
+];
+```
+
+**NOT allowed:**
+
+```javascript
+// ❌ WRONG: Don't duplicate preset ignores
+export default [
+  ...nodePreset,
+  {
+    ignores: [
+      '**/dist/**',        // Already in preset!
+      '**/node_modules/**', // Already in preset!
+    ]
+  }
+];
+```
+
+### tsconfig.json & tsconfig.build.json
+
+**NOT customizable!**
+
+These files MUST remain identical to templates. All TypeScript configuration is standardized in DevKit presets.
+
+```json
+// ❌ WRONG: Don't override extends
+{
+  "extends": "./my-custom-base.json"
+}
+
+// ❌ WRONG: Don't add compilerOptions
+{
+  "extends": "@kb-labs/devkit/tsconfig/node.json",
+  "compilerOptions": {
+    "strict": false  // Don't override preset!
+  }
+}
+```
+
+## 🔍 Drift Detection
+
+DevKit automatically detects configuration drift:
 
 ```bash
-# From kb-labs root directory
-pnpm install
+# Check all packages
+npx kb-devkit-check-configs
 
-# Build all packages
-pnpm --filter "@kb-labs/review-*" run build
+# Check specific package
+npx kb-devkit-check-configs --package=@kb-labs/core
 
-# Or build in order
-pnpm --filter @kb-labs/review-contracts run build
-pnpm --filter @kb-labs/review-heuristic run build
-pnpm --filter @kb-labs/review-core run build
-pnpm --filter @kb-labs/review-cli run build
+# Auto-fix (creates backup)
+npx kb-devkit-check-configs --fix
+
+# CI mode (fail on drift)
+npx kb-devkit-check-configs --ci
 ```
 
-### Project Structure
+### Drift Detection Rules
 
-```
-kb-labs-ai-review/
-├── packages/
-│   ├── review-contracts/    # Type definitions
-│   │   ├── src/types.ts
-│   │   └── src/index.ts
-│   │
-│   ├── review-heuristic/    # Heuristic engines
-│   │   ├── src/engine-registry.ts
-│   │   ├── src/deduplication.ts
-│   │   └── src/adapters/eslint-adapter.ts
-│   │
-│   ├── review-core/         # Orchestration
-│   │   └── src/orchestrator.ts
-│   │
-│   └── review-cli/          # CLI commands
-│       ├── src/commands/run.ts
-│       ├── src/formatters/index.ts
-│       └── src/manifest.ts
-│
-└── README.md (this file)
-```
+| Issue | Severity | Auto-fix |
+|-------|----------|----------|
+| Missing `dts: true` | 🔴 Error | ✅ Yes |
+| Using `dts: false` | 🔴 Error | ✅ Yes |
+| Not using `nodePreset` | 🔴 Error | ⚠️ Manual |
+| Duplicate `external` | 🟡 Warning | ✅ Yes |
+| Duplicate `ignores` | 🟡 Warning | ✅ Yes |
+| Missing templates | 🔴 Error | ✅ Yes |
+| Modified templates | 🔴 Error | ⚠️ Manual |
 
-### Testing
+## 📚 Examples
 
-```bash
-# Test on kb-labs-plugin-template
-cd /path/to/kb-labs-plugin-template
-kb review run --mode=heuristic
+### ✅ Good Example (Minimal Package)
+
+```typescript
+// tsup.config.ts
+import { defineConfig } from 'tsup';
+import nodePreset from '@kb-labs/devkit/tsup/node.js';
+
+export default defineConfig({
+  ...nodePreset,
+  tsconfig: 'tsconfig.build.json',
+  entry: ['src/index.ts'],
+  dts: true,
+});
 ```
 
-## Roadmap
+### ✅ Good Example (CLI Package with Multiple Entries)
 
-### Phase 1: Heuristic Layer ✅
-- [x] Monorepo structure
-- [x] Type definitions (review-contracts)
-- [x] ESLint adapter (review-heuristic)
-- [x] Orchestrator (review-core)
-- [x] CLI commands (review-cli)
-- [x] Built-in presets
+```typescript
+// tsup.config.ts
+import { defineConfig } from 'tsup';
+import nodePreset from '@kb-labs/devkit/tsup/node.js';
 
-### Phase 2: LLM Analyzers ✅
-- [x] LLM analyzers (architecture, security, naming)
-- [x] Full mode implementation
-- [x] LLM mode implementation
-- [x] Anti-hallucination verification
-- [x] Content-hash caching
+export default defineConfig({
+  ...nodePreset,
+  tsconfig: 'tsconfig.build.json',
+  entry: [
+    'src/index.ts',
+    'src/cli/index.ts',
+    'src/cli/commands/build.ts',
+    'src/cli/commands/test.ts',
+  ],
+  dts: true,
+});
+```
 
-### Phase 3: CLI Integration ✅ (Current)
-- [x] ctx.runtime.fs.glob() integration
-- [x] InputFile → ParsedFile flow
-- [x] Link dependencies (cross-repo)
-- [ ] Test on real codebase
-- [ ] CI/CD integration
+### ❌ Bad Example (Over-configured)
 
-### Phase 4: Future
-- [ ] Ruff adapter (Python)
-- [ ] golangci-lint adapter (Go)
-- [ ] Clippy adapter (Rust)
-- [ ] Mind RAG integration (dynamic examples)
-- [ ] Agent-powered preset generation
-- [ ] Auto-fix support
-- [ ] Studio integration
+```typescript
+// tsup.config.ts
+import { defineConfig } from 'tsup';
 
-## Design Decisions
+// ❌ Not using preset!
+export default defineConfig({
+  format: ['esm'],
+  target: 'es2022',
+  sourcemap: true,
+  clean: true,
+  dts: true,
+  entry: ['src/index.ts'],
+  external: [/^@kb-labs\/.*/],  // Manual external
+});
+```
 
-### 1. Unified Rule Contract
+## 🚀 Migration Guide
 
-All engines (heuristic and LLM) output the same `ReviewFinding` interface.
+### From Custom Config to Standard Template
 
-**Why:**
-- Enables unified deduplication
-- Consistent output format
-- Easy to extend with new engines
+1. **Backup your current config**
+   ```bash
+   cp tsup.config.ts tsup.config.ts.backup
+   ```
 
-### 2. Engine Type Priority (Not Tool Priority)
+2. **Copy standard template**
+   ```bash
+   cp kb-labs-devkit/templates/configs/tsup.config.ts .
+   ```
 
-Instead of hardcoding "ESLint always wins", we use **engine type priority**.
+3. **Migrate customizations** (only if needed)
+   - Compare your backup with template
+   - Extract only truly necessary customizations
+   - Add them with comments explaining why
 
-**Why:**
-- Language-agnostic
-- Predictable (priority based on engine type)
-- Easy to extend (add new tools without changing deduplication)
-- Respects expertise (compilers > linters > SAST)
+4. **Test build**
+   ```bash
+   pnpm run build
+   ```
 
-### 3. Content-Hash Based Caching
+5. **Verify types**
+   ```bash
+   npx kb-devkit-check-types
+   ```
 
-Cache keys include file content hashes for precise invalidation.
+## 🔗 Related
 
-**Why:**
-- Prevents stale cache (file changed → cache invalidated)
-- Fast repeat analysis (no re-analysis if unchanged)
-- Deterministic (same content → same cache key)
-
-### 4. Agent Mode Gating
-
-Only findings with `confidence='certain' + fix + scope='local' + automated=true` are shown to agents.
-
-**Why:**
-- Prevents agent hallucination (only certain findings)
-- Reduces blast radius (only local fixes)
-- Enables automation (only automated fixes)
-
-### 5. Platform Composables (Not Direct Access)
-
-Always use composables instead of direct platform access.
-
-**Why:**
-- Preserves prototype chain (methods available)
-- Consistent API across plugins
-- Future-proof (platform can change internals)
-
-### 6. Three Review Modes
-
-**heuristic**: Fast, deterministic, no LLM (CI pipelines)
-**full**: Heuristic + LLM (local development)
-**llm**: LLM-only (deep analysis)
-
-**Why:**
-- Flexibility (choose speed vs quality)
-- Cost control (avoid LLM in CI)
-- Use case driven (CI vs local vs deep)
-
-## Related Documentation
-
-- [AI Review Design](../docs/AI-REVIEW-DESIGN.md) - High-level design
-- [AI Review Spec](../docs/AI-REVIEW-SPEC.md) - Implementation spec
-- [V3 Plugin Guide](../kb-labs-plugin/docs/V3-PLUGIN-GUIDE.md) - Plugin architecture
-- [Platform Composables](../kb-labs-sdk/README.md) - useLLM, useCache, etc.
-
-## Contributing
-
-Follow KB Labs plugin conventions:
-
-1. **Package structure**: core/cli/contracts pattern
-2. **Build**: tsup with ESM output
-3. **Types**: Always generate .d.ts files
-4. **Platform**: Use composables (useLLM, useCache, useAnalytics)
-5. **Commands**: Use defineCommand() from @kb-labs/sdk
-6. **Manifest**: Follow kb.plugin/3 schema
-
-## License
-
-MIT
+- [DevKit README](../../README.md)
+- [DevKit Usage Guide](../../USAGE_GUIDE.md)
+- [ADR-0009: Unified Build Convention](../../docs/adr/0009-unified-build-convention.md)

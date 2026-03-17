@@ -17,6 +17,12 @@ pnpm --prefix "$ROOT_DIR" kb devlink switch --mode=npm
 
 restore() {
   echo "[devlink] restoring local mode..."
-  pnpm --prefix "$ROOT_DIR" kb devlink undo
+  if pnpm --prefix "$ROOT_DIR" kb devlink undo --dry-run > /dev/null 2>&1; then
+    if ! pnpm --prefix "$ROOT_DIR" kb devlink undo; then
+      echo "[devlink] warning: failed to restore local mode (continuing push)"
+    fi
+  else
+    echo "[devlink] no backup to restore, skipping undo"
+  fi
 }
 trap restore EXIT

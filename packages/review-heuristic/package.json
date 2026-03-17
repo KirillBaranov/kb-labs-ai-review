@@ -23,7 +23,7 @@
     "@kb-labs/review-contracts": "workspace:*"
   },
   "devDependencies": {
-    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@kb-labs/devkit": "workspace:*",
     "@types/node": "^24.3.3",
     "tsup": "^8.5.0",
     "typescript": "^5.6.3",

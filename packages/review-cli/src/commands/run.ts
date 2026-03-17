@@ -200,13 +200,13 @@ function toAgentReport(result: ReviewResult): AgentReviewReport {
   return { passed, issues, summary };
 }
 
-export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
+export default defineCommand<unknown, CLIInput<RunFlags>, AgentReviewReport>({
   id: 'review:run',
   description: 'Run code review analysis',
 
   handler: {
     // eslint-disable-next-line sonarjs/cognitive-complexity -- Main orchestration handler: coordinates input modes (repos/files/scope), git resolution, security filtering, output formats (agent/json/human), and severity-based exit codes
-    async execute(ctx: PluginContextV3, input: CLIInput<RunFlags>): Promise<CommandResult<ReviewResult>> {
+    async execute(ctx: PluginContextV3, input: CLIInput<RunFlags>): Promise<CommandResult<AgentReviewReport>> {
       const startTime = Date.now();
 
       // Extract flags from input
@@ -364,11 +364,7 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
         loader.succeed(`Found ${result.findings.length} issue(s)`);
 
         // Output results
-        if (flags.agent) {
-          // Agent-friendly format: simple pass/fail with actionable issues
-          const agentReport = toAgentReport(result);
-          ctx.ui?.json?.(agentReport);
-        } else if (flags.json) {
+        if (flags.json) {
           ctx.ui?.json?.(result);
         } else {
           // Build sections
@@ -488,21 +484,29 @@ export default defineCommand<unknown, CLIInput<RunFlags>, ReviewResult>({
         // Exit code based on severity
         const blockerCount = result.findings.filter((f) => f.severity === 'blocker').length;
         const highCount = result.findings.filter((f) => f.severity === 'high').length;
+        const agentReport = toAgentReport(result);
 
         if (blockerCount > 0) {
-          return { exitCode: 1, result };
+          return { exitCode: 1, result: agentReport };
         }
 
         if (mode === 'heuristic' && highCount > 0) {
           // In CI mode (heuristic), fail on high severity
-          return { exitCode: 1, result };
+          return { exitCode: 1, result: agentReport };
         }
 
-        return { exitCode: 0, result };
+        return { exitCode: 0, result: agentReport };
       } catch (error) {
-        loader.fail('Review failed');
-        ctx.ui?.error?.(error instanceof Error ? error.message : String(error));
-        return { exitCode: 1 };
+        const message = error instanceof Error ? error.message : String(error);
+        loader.fail(`Review failed: ${message}`);
+        ctx.ui?.error?.(message);
+        ctx.platform.logger?.error?.('review:run failed', error instanceof Error ? error : new Error(message));
+        const errorReport: AgentReviewReport = {
+          passed: false,
+          issues: [],
+          summary: `Review error: ${message}`,
+        };
+        return { exitCode: 1, result: errorReport };
       }
     },
   },

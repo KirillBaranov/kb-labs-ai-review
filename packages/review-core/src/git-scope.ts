@@ -5,12 +5,72 @@
  * Supports nested git repositories (submodules) common in monorepos.
  */
 
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, statSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { simpleGit, type SimpleGit, type StatusResult } from 'simple-git';
 import type { InputFile } from '@kb-labs/review-contracts';
 import { useLogger } from '@kb-labs/sdk';
+
+/**
+ * Parse .gitmodules to get all known submodule paths.
+ * Returns a map of: repo name → relative path from workspace root.
+ * e.g. "kb-labs-core" → "platform/kb-labs-core"
+ */
+function parseGitmodules(cwd: string): Map<string, string> {
+  const result = new Map<string, string>();
+  const gitmodulesPath = join(cwd, '.gitmodules');
+  if (!existsSync(gitmodulesPath)) return result;
+
+  try {
+    const content = readFileSync(gitmodulesPath, 'utf-8');
+    const pathMatches = content.matchAll(/^\s*path\s*=\s*(.+)$/gm);
+    for (const match of pathMatches) {
+      const relPath = (match[1] ?? '').trim();
+      if (!relPath) continue;
+      const name = relPath.split('/').pop() ?? relPath;
+      result.set(name, relPath);
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return result;
+}
+
+/**
+ * Resolve a repo name to its actual path.
+ * Supports both flat layout (kb-labs-core) and nested layout (platform/kb-labs-core).
+ * Uses .gitmodules for discovery — no hardcoded category dirs.
+ */
+function resolveRepoPath(cwd: string, repo: string, submodules: Map<string, string>): string | null {
+  // 1. Already a nested/direct path
+  const direct = join(cwd, repo);
+  if (existsSync(direct)) return direct;
+
+  // 2. Look up in .gitmodules
+  const relPath = submodules.get(repo);
+  if (relPath) {
+    const full = join(cwd, relPath);
+    if (existsSync(full)) return full;
+  }
+
+  return null;
+}
+
+/**
+ * Get the relative path of a repo from cwd (e.g. "platform/kb-labs-core").
+ * Uses .gitmodules for discovery — no hardcoded category dirs.
+ */
+function resolveRepoRelative(cwd: string, repo: string, submodules: Map<string, string>): string | null {
+  // Already a valid path
+  if (existsSync(join(cwd, repo))) return repo;
+
+  // Look up in .gitmodules
+  const relPath = submodules.get(repo);
+  if (relPath && existsSync(join(cwd, relPath))) return relPath;
+
+  return null;
+}
 
 export interface GitScopeOptions {
   /** Working directory (root of monorepo) */
@@ -62,16 +122,19 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
   let unstagedCount = 0;
   let untrackedCount = 0;
 
+  const submodules = parseGitmodules(cwd);
+
   for (const repo of repos) {
-    const repoPath = join(cwd, repo);
-    const gitPath = join(repoPath, '.git');
+    const repoPath = resolveRepoPath(cwd, repo, submodules);
+    const repoRelative = resolveRepoRelative(cwd, repo, submodules) ?? repo;
 
     // Check if repo exists and has .git
-    if (!existsSync(repoPath)) {
+    if (!repoPath) {
       useLogger()?.debug(`[git-scope] Repo not found: ${repo}`);
       continue;
     }
 
+    const gitPath = join(repoPath, '.git');
     const isNestedRepo = existsSync(gitPath);
     const gitCwd = isNestedRepo ? repoPath : cwd;
 
@@ -117,7 +180,7 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
 
           // Path relative to root cwd
           const relativePath = isNestedRepo
-            ? `${repo}/${filePath}`
+            ? `${repoRelative}/${filePath}`
             : filePath;
 
           allFiles.push({
@@ -146,37 +209,38 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
 }
 
 /**
- * Detect all submodules/nested repos in cwd
+ * Detect all submodules/nested repos in cwd.
+ * Reads paths from .gitmodules — no hardcoded category directories.
+ * Returns relative paths as they appear in .gitmodules (e.g. "platform/kb-labs-core").
  */
 export async function discoverRepos(cwd: string): Promise<string[]> {
+  const submodules = parseGitmodules(cwd);
+
+  if (submodules.size > 0) {
+    // Filter to only those that actually exist on disk
+    return [...submodules.values()].filter((relPath) =>
+      existsSync(join(cwd, relPath, '.git'))
+    );
+  }
+
+  // Fallback: scan top-level dirs for .git (flat layout)
   const repos: string[] = [];
-
   try {
-    const { readdirSync, statSync } = await import('node:fs');
     const entries = readdirSync(cwd);
-
     for (const entry of entries) {
-      const entryPath = join(cwd, entry);
-      const gitPath = join(entryPath, '.git');
-
-      // Skip hidden dirs and node_modules
-      if (entry.startsWith('.') || entry === 'node_modules') {
-        continue;
-      }
-
-      // Check if directory with .git
+      if (entry.startsWith('.') || entry === 'node_modules') continue;
       try {
-        if (statSync(entryPath).isDirectory() && existsSync(gitPath)) {
+        const entryPath = join(cwd, entry);
+        if (statSync(entryPath).isDirectory() && existsSync(join(entryPath, '.git'))) {
           repos.push(entry);
         }
       } catch {
-        // Skip
+        // skip
       }
     }
   } catch {
-    // Return empty if can't read
+    // return empty
   }
-
   return repos;
 }
 

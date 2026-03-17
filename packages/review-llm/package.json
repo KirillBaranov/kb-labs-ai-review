@@ -42,10 +42,10 @@
   },
   "dependencies": {
     "@kb-labs/review-contracts": "workspace:*",
-    "@kb-labs/sdk": "^1.0.0"
+    "@kb-labs/sdk": "workspace:*"
   },
   "devDependencies": {
-    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@kb-labs/devkit": "workspace:*",
     "@types/node": "^24.3.3",
     "rimraf": "^6.0.1",
     "tsup": "^8.5.0",

@@ -25,8 +25,8 @@
   "dependencies": {
     "@kb-labs/review-contracts": "workspace:*",
     "@kb-labs/review-core": "workspace:*",
-    "@kb-labs/sdk": "^1.0.0",
-    "@kb-labs/shared-cli-ui": "^1.0.0",
+    "@kb-labs/sdk": "workspace:*",
+    "@kb-labs/shared-cli-ui": "workspace:*",
     "chalk": "^5.3.0"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "tsup": "^8.5.0",
     "typescript": "^5.6.3",
     "rimraf": "^6.0.1",
-    "@kb-labs/devkit": "link:../../../kb-labs-devkit",
+    "@kb-labs/devkit": "workspace:*",
     "vitest": "^3.2.4"
   },
   "engines": {
