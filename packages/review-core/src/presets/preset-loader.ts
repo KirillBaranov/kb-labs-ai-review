@@ -124,7 +124,7 @@ export class PresetLoader {
         for (const presetOrPath of config.presets) {
           if (typeof presetOrPath === 'string') {
             // It's a file path - load preset from file
-            // eslint-disable-next-line no-await-in-loop -- Sequential preset loading maintains order
+             
             await this.loadPresetFromFile(presetOrPath);
           } else {
             // It's an inline preset definition
@@ -174,7 +174,7 @@ export class PresetLoader {
         const filePath = pathModule.join(presetsDir, file.name);
 
         try {
-          // eslint-disable-next-line no-await-in-loop -- Sequential file reading for preset loading
+           
           const content = await fs.readFile(filePath, 'utf-8');
           const preset = JSON.parse(content) as PresetDefinition;
 
@@ -250,7 +250,7 @@ export class PresetLoader {
         continue;
       }
 
-      // eslint-disable-next-line no-await-in-loop -- Sequential rule loading preserves order
+       
       const ruleContent = await this.loadAtomicRule(category, ruleName);
       if (ruleContent) {
         rules.push(ruleContent);
@@ -286,7 +286,7 @@ export class PresetLoader {
         continue;
       }
 
-      // eslint-disable-next-line no-await-in-loop -- Sequential category processing
+       
       const composedRules = await this.composeRules(
         category,
         ruleConfig.include,

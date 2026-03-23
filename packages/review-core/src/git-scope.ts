@@ -20,14 +20,14 @@ import { useLogger } from '@kb-labs/sdk';
 function parseGitmodules(cwd: string): Map<string, string> {
   const result = new Map<string, string>();
   const gitmodulesPath = join(cwd, '.gitmodules');
-  if (!existsSync(gitmodulesPath)) return result;
+  if (!existsSync(gitmodulesPath)) {return result;}
 
   try {
     const content = readFileSync(gitmodulesPath, 'utf-8');
     const pathMatches = content.matchAll(/^\s*path\s*=\s*(.+)$/gm);
     for (const match of pathMatches) {
       const relPath = (match[1] ?? '').trim();
-      if (!relPath) continue;
+      if (!relPath) {continue;}
       const name = relPath.split('/').pop() ?? relPath;
       result.set(name, relPath);
     }
@@ -45,13 +45,13 @@ function parseGitmodules(cwd: string): Map<string, string> {
 function resolveRepoPath(cwd: string, repo: string, submodules: Map<string, string>): string | null {
   // 1. Already a nested/direct path
   const direct = join(cwd, repo);
-  if (existsSync(direct)) return direct;
+  if (existsSync(direct)) {return direct;}
 
   // 2. Look up in .gitmodules
   const relPath = submodules.get(repo);
   if (relPath) {
     const full = join(cwd, relPath);
-    if (existsSync(full)) return full;
+    if (existsSync(full)) {return full;}
   }
 
   return null;
@@ -63,11 +63,11 @@ function resolveRepoPath(cwd: string, repo: string, submodules: Map<string, stri
  */
 function resolveRepoRelative(cwd: string, repo: string, submodules: Map<string, string>): string | null {
   // Already a valid path
-  if (existsSync(join(cwd, repo))) return repo;
+  if (existsSync(join(cwd, repo))) {return repo;}
 
   // Look up in .gitmodules
   const relPath = submodules.get(repo);
-  if (relPath && existsSync(join(cwd, relPath))) return relPath;
+  if (relPath && existsSync(join(cwd, relPath))) {return relPath;}
 
   return null;
 }
@@ -140,7 +140,7 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
 
     try {
       const git: SimpleGit = simpleGit(gitCwd);
-      // eslint-disable-next-line no-await-in-loop -- Sequential per-repo processing is intentional
+       
       const status: StatusResult = await git.status();
 
       // Collect file paths based on options
@@ -175,7 +175,7 @@ export async function resolveGitScope(options: GitScopeOptions): Promise<ScopedF
       for (const filePath of uniquePaths) {
         try {
           const absolutePath = join(gitCwd, filePath);
-          // eslint-disable-next-line no-await-in-loop -- Sequential file reading for memory efficiency
+           
           const content = await readFile(absolutePath, 'utf-8');
 
           // Path relative to root cwd
@@ -228,7 +228,7 @@ export async function discoverRepos(cwd: string): Promise<string[]> {
   try {
     const entries = readdirSync(cwd);
     for (const entry of entries) {
-      if (entry.startsWith('.') || entry === 'node_modules') continue;
+      if (entry.startsWith('.') || entry === 'node_modules') {continue;}
       try {
         const entryPath = join(cwd, entry);
         if (statSync(entryPath).isDirectory() && existsSync(join(entryPath, '.git'))) {
@@ -256,7 +256,7 @@ export async function getReposWithChanges(cwd: string): Promise<string[]> {
 
     try {
       const git: SimpleGit = simpleGit(repoPath);
-      // eslint-disable-next-line no-await-in-loop -- Sequential per-repo processing is intentional
+       
       const status: StatusResult = await git.status();
 
       const hasChanges =
