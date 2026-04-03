@@ -1,33 +1,9 @@
 #!/usr/bin/env bash
-# DevLink post-push hook — managed by kb-labs-devkit, do not edit manually.
-# Restores local mode after push and clears plugin cache.
+# Post-push hook — managed by kb-labs-devkit, do not edit manually.
+#
+# Note: DevLink undo was removed here — npm switch no longer runs
+# during push, so there is nothing to restore. npm mode is only
+# used during `npm publish` (managed by Release Manager).
 
-REPO_DIR="$(git rev-parse --show-toplevel)"
-
-# Walk up from repo to find the kb-labs monorepo root (has kb-labs-cli/packages/cli-bin)
-KB_ROOT="$REPO_DIR"
-while [ "$KB_ROOT" != "/" ]; do
-  if [ -f "$KB_ROOT/kb-labs-cli/packages/cli-bin/dist/bin.js" ]; then
-    break
-  fi
-  KB_ROOT="$(dirname "$KB_ROOT")"
-done
-
-if [ "$KB_ROOT" = "/" ]; then
-  KB_ROOT="$(dirname "$REPO_DIR")"
-fi
-
-# Check if devlink is available
-if ! pnpm --prefix "$KB_ROOT" kb devlink --help > /dev/null 2>&1; then
-  exit 0
-fi
-
-# Only restore if currently in npm mode
-STATUS=$(pnpm --prefix "$KB_ROOT" kb devlink status --json 2>/dev/null | grep '"currentMode"' | grep -o '"npm"\|"local"\|null')
-if [ "$STATUS" != '"npm"' ]; then
-  exit 0
-fi
-
-echo "[devlink] restoring local mode after push..."
-pnpm --prefix "$KB_ROOT" kb devlink undo
-pnpm --prefix "$KB_ROOT" kb plugins clear-cache > /dev/null 2>&1 || true
+# No-op for now. Add project-specific post-push actions here if needed.
+exit 0
