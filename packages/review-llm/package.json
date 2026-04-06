@@ -1,8 +1,7 @@
 {
   "name": "@kb-labs/review-llm",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "type": "module",
-  "private": true,
   "description": "LLM-based analysis for KB Labs AI Review",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
