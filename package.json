@@ -1,6 +1,6 @@
 {
   "name": "@kb-labs/ai-review",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "AI-powered code review plugin for the KB Labs ecosystem.",
   "type": "module",
   "author": {
